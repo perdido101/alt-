@@ -12,8 +12,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'ΑΛΤ!',
   slug: 'alt',
   owner: 'f1com',
-  // Over-the-air JS updates (EAS Update). Native changes always need a new build: the fingerprint changes.
-  runtimeVersion: { policy: 'fingerprint' },
+  // Over-the-air JS updates (EAS Update) reach builds with the same app version. Bump `version` whenever
+  // native code changes (modules, permissions, plugins) so old builds never get incompatible JS.
+  runtimeVersion: { policy: 'appVersion' },
   updates: { url: `https://u.expo.dev/${easProjectId}` },
   scheme: 'alt',
   version: '0.1.0',
