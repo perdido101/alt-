@@ -1,11 +1,58 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": { "dependsOn": ["^build"], "outputs": [".next/**", "!.next/cache/**", "dist/**"] },
-    "dev": { "cache": false, "persistent": true },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "EXPO_PUBLIC_*",
+        "SUPABASE_*",
+        "ANTHROPIC_*",
+        "ANALYSIS_EFFORT",
+        "ELEVENLABS_*",
+        "RAW_MEDIA_RETENTION_HOURS",
+        "UPSTASH_*",
+        "QSTASH_*",
+        "CRON_SECRET",
+        "FEATURE_*",
+        "VIBER_*",
+        "WHATSAPP_*",
+        "STRIPE_*",
+        "RESEND_*",
+        "EMAIL_FROM",
+        "SUPPORT_EMAIL",
+        "SALES_EMAIL",
+        "EXPO_ACCESS_TOKEN",
+        "SMS_*",
+        "TWILIO_*",
+        "ALERT_ESCALATION_MINUTES",
+        "POSTHOG_*",
+        "SENTRY_*",
+        "INVOICING_PROVIDER",
+        "APP_BUNDLE_ID",
+        "APPLE_TEAM_ID",
+        "ANDROID_CERT_SHA256",
+        "ALT_DEMO_MODE"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
     "lint": {},
     "typecheck": {},
-    "test": { "outputs": [] },
-    "test:e2e": { "cache": false }
+    "test": {
+      "outputs": []
+    },
+    "test:e2e": {
+      "cache": false
+    }
   }
 }
