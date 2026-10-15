@@ -4,11 +4,17 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 const webUrl = process.env.EXPO_PUBLIC_WEB_URL ?? 'https://alt.example';
 const webHost = new URL(webUrl).host;
 const bundleId = process.env.APP_BUNDLE_ID ?? 'gr.alt.app';
+/** EAS project (expo.dev, owner f1com). Not a secret. */
+const easProjectId = 'd16dab41-7886-4136-a3c7-09daa33ce767';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'ΑΛΤ!',
   slug: 'alt',
+  owner: 'f1com',
+  // Over-the-air JS updates (EAS Update). Native changes always need a new build: the fingerprint changes.
+  runtimeVersion: { policy: 'fingerprint' },
+  updates: { url: `https://u.expo.dev/${easProjectId}` },
   scheme: 'alt',
   version: '0.1.0',
   orientation: 'portrait',
@@ -78,5 +84,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['expo-audio', { microphonePermission: 'Η ΑΛΤ! ακούει μόνο όσο της μιλάς, για να ελέγξει τι σου είπαν.' }],
   ],
   experiments: { typedRoutes: true },
-  extra: { webUrl },
+  extra: { webUrl, eas: { projectId: easProjectId } },
 });

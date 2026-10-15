@@ -36,6 +36,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
     "expo-task-manager": "~57.0.21",
+    "expo-updates": "~57.0.26",
     "i18next": "^26.4.5",
     "i18next-icu": "^2.5.0",
     "intl-messageformat": "^10.7.18",
