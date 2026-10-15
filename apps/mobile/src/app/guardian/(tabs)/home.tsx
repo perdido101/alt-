@@ -13,6 +13,9 @@ import { Wordmark } from '@/components/Wordmark';
 import { openAlerts } from '@/lib/alerts';
 import { callNumber } from '@/lib/family';
 import { useParentStatuses } from '@/lib/parentStatus';
+import { weeklyScam } from '@/lib/radar';
+import { apiUrl } from '@/lib/server';
+import { Linking } from 'react-native';
 import { useCircleMembers } from '@/lib/queries';
 import { useAppStore } from '@/lib/store';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -26,6 +29,8 @@ export default function GuardianHome() {
   const alerts = useQuery({ queryKey: ['openAlerts', circleId], queryFn: () => openAlerts(circleId!), enabled: !!circleId, refetchInterval: 15_000 });
   const parents = (members.data ?? []).filter((m) => m.role === 'protected');
   const statuses = useParentStatuses(parents.map((p) => p.userId));
+  const locale = useAppStore((s) => s.locale);
+  const weekly = useQuery({ queryKey: ['weeklyScam', locale], queryFn: () => weeklyScam(locale), staleTime: 3_600_000 });
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
@@ -65,6 +70,14 @@ export default function GuardianHome() {
             />
           </Card>
         )}
+        {weekly.data ? (
+          <Card tone="calm">
+            <AppText variant="gBody" color={colors.textSoft}>{t('web.radar.weekly')}</AppText>
+            <AppText variant="gTitle">{weekly.data.title}</AppText>
+            <AppText variant="gBody">{weekly.data.summary}</AppText>
+            <BigButton variant="plain" align="left" label={t('email.readMore')} onPress={() => void Linking.openURL(`${apiUrl}/${locale}/scam-radar/${weekly.data!.slug}`)} />
+          </Card>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

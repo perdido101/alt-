@@ -34,3 +34,17 @@ jobs:
           gradle-version: 8.14.3
       # Call-screening decision logic, checked against the same fixtures as packages/core.
       - run: gradle -p apps/mobile/modules/call-shield/logic test
+
+  e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @alt/web exec playwright install --with-deps chromium
+      # Builds and serves the site without any accounts (bundled content, demo data source).
+      - run: pnpm --filter @alt/web test:e2e

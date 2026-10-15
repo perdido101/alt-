@@ -5,6 +5,7 @@
     "dev": { "cache": false, "persistent": true },
     "lint": {},
     "typecheck": {},
-    "test": { "outputs": [] }
+    "test": { "outputs": [] },
+    "test:e2e": { "cache": false }
   }
 }

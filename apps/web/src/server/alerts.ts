@@ -1,5 +1,5 @@
 import 'server-only';
-import { normalisePhone, type AlertSource } from '@alt/core';
+import { entitlements, normalisePhone, type AlertSource, type Plan } from '@alt/core';
 import { isLocale, localeTags, translate, type Locale } from '@alt/i18n';
 import { env } from './env';
 import { scheduleJob } from './jobs/schedule';
@@ -124,8 +124,10 @@ export async function escalateAlert(alertId: string): Promise<{ escalated: boole
   const { data: claimed } = await db.rpc('claim_alert_escalation', { p_alert: alertId });
   if (claimed !== true) return { escalated: false, sms: 0 };
 
-  const { data: alertRow } = await db.from('alerts').select('circle_id, protected_user_id, source, created_at').eq('id', alertId).single();
-  const alert = alertRow as { circle_id: string; protected_user_id: string; source: AlertSource; created_at: string };
+  const { data: alertRow } = await db.from('alerts').select('circle_id, protected_user_id, source, created_at, circles(plan)').eq('id', alertId).single();
+  const alert = alertRow as unknown as { circle_id: string; protected_user_id: string; source: AlertSource; created_at: string; circles: { plan: Plan } | null };
+  // Free plans get push alerts only; SMS escalation is a paid extra.
+  if (!entitlements[alert.circles?.plan ?? 'free'].smsEscalation) return { escalated: true, sms: 0 };
   const [{ data: memberRow }, { data: contacts }] = await Promise.all([
     db.from('circle_members').select('display_name, phone').eq('circle_id', alert.circle_id).eq('user_id', alert.protected_user_id).single(),
     db.from('family_contacts').select('phone, is_guardian, is_backup').eq('circle_id', alert.circle_id),

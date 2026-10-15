@@ -11,11 +11,14 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "db:test": "bash scripts/db-test.sh"
+    "db:test": "bash scripts/db-test.sh",
+    "stripe:setup": "tsx scripts/stripe-setup.ts"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "tsx": "^4.20.0",
+    "stripe": "^23.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

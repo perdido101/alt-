@@ -36,6 +36,15 @@ const schema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().min(1).optional(),
   WHATSAPP_GRAPH_VERSION: z.string().default('v21.0'),
 
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().default('ΑΛΤ! <hello@alt.example>'),
+  SUPPORT_EMAIL: z.string().default('hello@alt.example'),
+  /** Where B2B / contact form submissions are emailed. */
+  SALES_EMAIL: z.string().default('hello@alt.example'),
+
   EXPO_ACCESS_TOKEN: z.string().min(1).optional(),
   SMS_PROVIDER: z.enum(['twilio', 'console']).default('console'),
   TWILIO_ACCOUNT_SID: z.string().min(1).optional(),

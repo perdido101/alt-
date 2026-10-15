@@ -64,7 +64,7 @@ select tests.eq((select count(*) from public.profiles), 3::bigint, 'guardian see
 select tests.eq((select count(*) from public.org_stats_weekly), 0::bigint, 'guardian sees no org stats');
 select tests.eq((select count(*) from public.audit_log), 0::bigint, 'guardian sees no audit log');
 select tests.expect_error('select * from public.safe_words', 'permission denied');
-select tests.expect_error('select * from public.gift_codes', 'permission denied');
+select tests.eq((select count(*) from public.gift_codes), 0::bigint, 'guardian sees no gift codes');
 select tests.expect_error($$update public.circles set plan = 'family_plus'$$, 'permission denied');
 select tests.expect_error($$update public.profiles set is_admin = true$$, 'permission denied');
 select tests.expect_error($$insert into public.checks (circle_id, user_id, input_kind, verdict, category, reason, action)
@@ -305,3 +305,35 @@ insert into public.call_events (circle_id, user_id, number_kind, classification,
 values (:'circle', auth.uid(), 'hidden', 'risky', 'local-1') on conflict (user_id, client_ref) do nothing;
 select tests.eq((select count(*) from public.call_events where client_ref = 'local-1'), 1::bigint, 'idempotent upload');
 reset role;
+
+-- Quizzes (milestone 5)
+insert into public.safe_word_quizzes (id, circle_id, user_id, scheduled_for)
+values ('00000000-0000-4000-8000-0000000000d1', :'circle', :'maria', now());
+select tests.login(:'maria', true);
+set role authenticated;
+select tests.eq(public.answer_quiz('00000000-0000-4000-8000-0000000000d1', 'πορτοκάλι')::text, 'wrong', 'wrong word');
+select tests.eq(public.answer_quiz('00000000-0000-4000-8000-0000000000d1', ' Λεμονόπιτα')::text, 'correct', 'right word, any accents');
+select tests.eq(public.answer_quiz('00000000-0000-4000-8000-0000000000d1', 'x')::text, 'correct', 'stays correct');
+reset role;
+select tests.login(:'giannis');
+set role authenticated;
+select tests.expect_error($$select public.answer_quiz('00000000-0000-4000-8000-0000000000d1', 'λεμονόπιτα')$$, 'forbidden');
+reset role;
+
+-- Gift codes
+insert into public.gift_codes (code, plan, months) values ('GIFT-TEST-0001', 'family', 6), ('GIFT-TEST-0002', 'family', 3);
+select tests.login('00000000-0000-4000-8000-000000000102', false);
+set role authenticated;
+select tests.eq((select count(*) from public.gift_codes), 0::bigint, 'gift codes hidden');
+select public.redeem_gift_code(:'new_circle', 'gift-test-0001');
+select tests.eq((select plan::text from public.circles where id = :'new_circle'), 'family', 'gift upgrades the circle');
+select tests.eq((select provider from public.subscriptions where circle_id = :'new_circle'), 'gift', 'gift subscription');
+select tests.expect_error(format($$select public.redeem_gift_code(%L, 'GIFT-TEST-0001')$$, :'new_circle'), 'code_invalid');
+reset role;
+-- Stripe-subscribed circles can't stack a gift.
+update public.subscriptions set provider = 'stripe' where circle_id = :'circle';
+select tests.login(:'giannis');
+set role authenticated;
+select tests.expect_error(format($$select public.redeem_gift_code(%L, 'GIFT-TEST-0002')$$, :'circle'), 'already_subscribed');
+reset role;
+select tests.eq((select email from public.profiles where id = :'giannis'), 'giannis@example.com', 'profile email synced');

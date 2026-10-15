@@ -10,7 +10,11 @@ import { Choice } from '@/components/Choice';
 import { Screen } from '@/components/Screen';
 import { updateProfile } from '@/lib/api';
 import { useSafeWordStatus } from '@/lib/queries';
-import { useProtectionLevel } from '@/lib/settings';
+import { useCircleSettings, useProtectionLevel, useUpdateCircle } from '@/lib/settings';
+import { TextField } from '@/components/TextField';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { entitlements } from '@alt/core';
 import { useAppStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -21,6 +25,33 @@ export default function GuardianSettings() {
   const { locale, setLocale, reset } = useAppStore();
   const safeWord = useSafeWordStatus();
   const protection = useProtectionLevel();
+  const circle = useCircleSettings();
+  const updateCircle = useUpdateCircle();
+  const qc = useQueryClient();
+  const prefs = useQuery({
+    queryKey: ['prefs'],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const { data } = await supabase.from('profiles').select('notify_digest_email, notify_quiz_nudges').eq('id', u.user!.id).single();
+      return { id: u.user!.id, ...(data as { notify_digest_email: boolean; notify_quiz_nudges: boolean }) };
+    },
+  });
+  const setPref = async (patch: Partial<{ notify_digest_email: boolean; notify_quiz_nudges: boolean }>) => {
+    if (!prefs.data) return;
+    await supabase.from('profiles').update(patch).eq('id', prefs.data.id);
+    await qc.invalidateQueries({ queryKey: ['prefs'] });
+  };
+  const [code, setCode] = useState('');
+  const [redeemMsg, setRedeemMsg] = useState<string | null>(null);
+  const redeem = async () => {
+    const circleId = useAppStore.getState().circleId;
+    let { error } = await supabase.rpc('redeem_gift_code', { p_circle: circleId, p_code: code });
+    if (error && /code_invalid/.test(error.message)) ({ error } = await supabase.rpc('redeem_licence_code', { p_circle: circleId, p_code: code }));
+    setRedeemMsg(!error ? t('dashboard.redeemed') : /already_subscribed/.test(error.message) ? t('dashboard.redeemAlreadySubscribed') : t('dashboard.redeemInvalid'));
+    await qc.invalidateQueries({ queryKey: ['circleSettings'] });
+  };
+  const plan = circle.data?.plan as 'free' | 'family' | 'family_plus' | undefined;
+  const allowedLevels = entitlements[plan ?? 'free'].protectionLevels;
 
   return (
     <Screen>
@@ -49,18 +80,34 @@ export default function GuardianSettings() {
             label={t(`protection.${level}`)}
             sub={t(`protection.${level}Sub`)}
             selected={protection.level === level}
-            onPress={() => protection.set(level)}
+            onPress={() => allowedLevels.includes(level) && protection.set(level)}
           />
         ))}
       </View>
+      <AppText variant="gTitle">{t('dashboard.quizFrequency')}</AppText>
+      <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+        {[7, 14, 30].map((days) => (
+          <Choice key={days} label={t('dashboard.every', { days })} selected={circle.data?.quiz_interval_days === days} onPress={() => updateCircle.mutate({ quiz_interval_days: days })} />
+        ))}
+      </View>
+      <AppText variant="gTitle">{t('dashboard.notifications')}</AppText>
+      <Choice kind="checkbox" label={t('dashboard.digestEmail')} selected={!!prefs.data?.notify_digest_email} onPress={() => void setPref({ notify_digest_email: !prefs.data?.notify_digest_email })} />
+      <Choice kind="checkbox" label={t('dashboard.quizNudges')} selected={!!prefs.data?.notify_quiz_nudges} onPress={() => void setPref({ notify_quiz_nudges: !prefs.data?.notify_quiz_nudges })} />
+      <BigButton variant="outline" label={t('guardian.settings.familyNumbers')} onPress={() => router.push('/guardian/family-numbers')} />
+      <Card>
+        <AppText variant="gTitle">{t('guardian.settings.subscription')}</AppText>
+        <AppText variant="gBody">{t('dashboard.plan', { plan: t(plan === 'family_plus' ? 'web.pricing.familyPlus' : plan === 'family' ? 'web.pricing.family' : 'web.pricing.free') })}</AppText>
+        <AppText variant="gBody" color={colors.textSoft}>{t('guardian.settings.subscriptionWeb')}</AppText>
+        <TextField label={t('dashboard.redeemTitle')} value={code} onChangeText={setCode} autoCapitalize="characters" />
+        <BigButton variant="outline" label={t('dashboard.redeem')} onPress={() => void redeem()} disabled={code.trim().length < 4} />
+        {redeemMsg ? <AppText variant="gBody" accessibilityLiveRegion="polite">{redeemMsg}</AppText> : null}
+      </Card>
       <Card>
         <AppText variant="gTitle">{t('guardian.settings.safeWord')}</AppText>
         <AppText variant="gBody" color={colors.textSoft}>
           {safeWord.data?.isSet ? t('guardian.settings.safeWordHashedNote') : t('setup.safeWord.body')}
         </AppText>
-        <AppText variant="gBody" color={colors.textSoft}>
-          {t('guardian.settings.safeWordReauth')}
-        </AppText>
+        <BigButton variant="outline" label={t('guardian.settings.safeWordChange')} onPress={() => router.push('/guardian/safe-word')} />
       </Card>
       <BigButton
         variant="outline"

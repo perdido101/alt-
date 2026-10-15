@@ -15,7 +15,7 @@ EAS environment variables (mobile), Vercel (web) and Supabase secrets (Edge Func
    - **Phone**: on, with an SMS provider that covers Greece (Twilio, MessageBird/Bird, Vonage).
    - **Anonymous sign-ins**: on (parent phones). Keep CAPTCHA / rate limits on.
 4. Authentication → URL configuration: add redirect URLs `alt://auth-callback` and
-   `https://<site>/auth/callback`.
+   `https://<site>/api/auth/callback`.
 5. Copy the project URL and **anon** key for the mobile app. The service-role key is for servers only.
 
 ### Expo / EAS

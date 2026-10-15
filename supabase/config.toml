@@ -24,7 +24,7 @@ port = 54323
 enabled = true
 site_url = "http://localhost:3000"
 # Magic links open the app (guardian) or the web dashboard.
-additional_redirect_urls = ["alt://auth-callback", "exp+alt://auth-callback", "http://localhost:3000/auth/callback"]
+additional_redirect_urls = ["alt://auth-callback", "exp+alt://auth-callback", "http://localhost:3000/api/auth/callback"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 enable_signup = true

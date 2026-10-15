@@ -48,6 +48,8 @@ export async function registerForPush(): Promise<boolean> {
 function routeFor(data: Record<string, unknown> | undefined): Href | null {
   if (!data) return null;
   if (data.type === 'alert' && typeof data.alertId === 'string') return { pathname: '/guardian/alert/[id]', params: { id: data.alertId } };
+  if (data.type === 'quiz') return { pathname: '/parent/quiz', params: typeof data.quizId === 'string' ? { quizId: data.quizId } : {} };
+  if (data.type === 'quiz_nudge') return '/guardian/home';
   return null;
 }
 
