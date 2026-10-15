@@ -1,0 +1,213 @@
+{
+  "brand": {
+    "name": "ΑΛΤ!",
+    "tagline": "Before you pay, ask.",
+    "neverAsks": "ΑΛΤ! will never ask for codes, cards or your bank PIN.",
+    "neverAsksWeb": "ΑΛΤ! will never ask you for codes, cards or PINs."
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "done": "Done",
+    "skip": "Skip",
+    "edit": "Change",
+    "remove": "Remove",
+    "add": "Add",
+    "loading": "One moment…",
+    "retry": "Try again",
+    "readAloud": "Read it to me",
+    "home": "Home",
+    "ok": "OK",
+    "comingSoon": "Coming soon"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again in a moment.",
+    "offline": "There is no internet connection.",
+    "inviteInvalid": "This invitation is no longer valid. Ask your family for a new one.",
+    "inviteExpired": "This invitation has expired. Ask your family for a new one.",
+    "circleFull": "This family already has the most members its plan allows.",
+    "phoneInvalid": "This number doesn't look right. Please check it again.",
+    "emailInvalid": "This email doesn't look right.",
+    "safeWordTooShort": "The word needs at least 3 letters.",
+    "safeWordMismatch": "The two words are not the same. Please type it again."
+  },
+  "welcome": {
+    "title": "Welcome to ΑΛΤ!",
+    "subtitle": "Protection from phone and message scams, for our parents.",
+    "guardianCta": "I want to protect my parent",
+    "guardianCtaSub": "Create a family and send an invitation",
+    "parentCta": "I received an invitation",
+    "parentCtaSub": "Scan the code or open the link"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "We'll send you a link. No password needed.",
+    "byEmail": "By email",
+    "byPhone": "By mobile",
+    "emailLabel": "Your email",
+    "phoneLabel": "Your mobile number",
+    "send": "Send me a link",
+    "sentEmail": "We sent an email to {email}. Open the link on this phone.",
+    "sentPhone": "We sent a code by SMS to {phone}.",
+    "otpLabel": "The code from the SMS",
+    "otpLabelEmail": "The code from the email",
+    "verify": "Sign in",
+    "signOut": "Sign out"
+  },
+  "circle": {
+    "createTitle": "Your family",
+    "createSubtitle": "Give it a name and tell us your name.",
+    "nameLabel": "Family name",
+    "namePlaceholder": "e.g. The Papadopoulos family",
+    "yourNameLabel": "Your name",
+    "create": "Create",
+    "members": "Members",
+    "guardian": "Guardian",
+    "protected": "Protected",
+    "limits": "Up to {guardians} guardians and {parents} parents"
+  },
+  "invite": {
+    "title": "Invitation",
+    "parentTitle": "Connect your parent's phone",
+    "parentBody": "Take their phone and scan this code with the camera, or send them the link.",
+    "guardianTitle": "Add another guardian",
+    "guardianBody": "Send the link to a brother, sister or someone else close to you.",
+    "parentNameLabel": "What's their name?",
+    "parentNamePlaceholder": "e.g. Maria",
+    "createParent": "Invite a parent",
+    "createGuardian": "Invite a guardian",
+    "share": "Send the link",
+    "shareMessage": "I'm inviting you to ΑΛΤ!, so we can look out for each other against scams: {url}",
+    "expires": "Valid for {hours} hours.",
+    "qrLabel": "QR code to join the family",
+    "revoke": "Cancel invitation"
+  },
+  "join": {
+    "title": "Join your family",
+    "scan": "Scan the code",
+    "scanBody": "Point the camera at the QR code on your child's phone.",
+    "pasteLabel": "Or paste the link",
+    "join": "Join",
+    "cameraPermission": "ΑΛΤ! only needs the camera to read the code.",
+    "allowCamera": "Allow the camera",
+    "joining": "Joining…"
+  },
+  "consent": {
+    "title": "Before we start",
+    "body": "Your family will see your checks and alerts, so they can protect you.",
+    "detail": "They don't see your messages, photos or conversations. They only see what you checked, the answer you got and when you asked for help.",
+    "agree": "I agree",
+    "whoProtectsMe": "Who protects me",
+    "whoProtectsMeBody": "These people see your checks and alerts:"
+  },
+  "setup": {
+    "progress": "Setting up together · {current} of {total}",
+    "footer": "ΑΛΤ! will never ask for codes, cards or your bank PIN.",
+    "language": {
+      "title": "Language and text size",
+      "languageLabel": "Language",
+      "textSizeLabel": "Text size",
+      "sizeLarge": "Large",
+      "sizeExtraLarge": "Extra large",
+      "sizeHuge": "Huge",
+      "preview": "This is how the text will look."
+    },
+    "calls": {
+      "title": "Call protection",
+      "body": "This step is coming in a later version. For now, go on to the next one."
+    },
+    "family": {
+      "title": "Family phone numbers",
+      "body": "Calls from these numbers won't show a warning.",
+      "pickFromContacts": "Choose from contacts",
+      "typeNumber": "Type a number",
+      "nameLabel": "Name",
+      "phoneLabel": "Phone",
+      "relationLabel": "Who is this?",
+      "isGuardian": "Guardian (receives alerts)",
+      "isBackup": "Neighbour or friend for emergencies",
+      "empty": "You haven't added any numbers yet.",
+      "contactsPermission": "ΑΛΤ! only reads the contacts you choose."
+    },
+    "safeWord": {
+      "title": "Our word",
+      "body": "Choose a secret word together. If someone says they're family and asks for money, ask them for the word.",
+      "guidance": "Something odd but easy, that isn't on Facebook.",
+      "wordLabel": "The word",
+      "confirmLabel": "Type it once more",
+      "saved": "Only we remember it. We don't send it anywhere.",
+      "hint": "Don't write it on a note next to the phone."
+    },
+    "test": {
+      "title": "Test call",
+      "body": "This step is coming in a later version."
+    },
+    "finish": "All done!",
+    "finishBody": "ΑΛΤ! is ready to look out for you."
+  },
+  "parent": {
+    "home": {
+      "greetingMorning": "Good morning, {name}",
+      "greetingEvening": "Good evening, {name}",
+      "status": "You're protected",
+      "checkMessage": "Check a message",
+      "checkMessageSub": "SMS, photo or voice message",
+      "justCalled": "Someone just called me",
+      "justCalledSub": "Tell me what they said",
+      "askingMoney": "Someone is asking me for money",
+      "askingMoneySub": "Alerts your family straight away",
+      "safeWordTitle": "Our word",
+      "safeWordBody": "If someone says they're family and asks for money, ask them for the word.",
+      "sponsoredBy": "Supported by the Municipality of {name}"
+    },
+    "pin": {
+      "title": "Enter your PIN",
+      "setTitle": "Would you like a PIN for the app?",
+      "setBody": "Optional. 4 numbers you'll remember.",
+      "wrong": "That's not it. Try again."
+    }
+  },
+  "guardian": {
+    "nav": {
+      "home": "Home",
+      "history": "History",
+      "family": "Family",
+      "settings": "Settings"
+    },
+    "home": {
+      "protected": "Protected",
+      "notJoined": "Hasn't joined yet",
+      "noParents": "You haven't connected a parent yet.",
+      "inviteParent": "Connect your parent",
+      "startSetup": "Do the setup on their phone",
+      "startSetupBody": "Take your parent's phone. You set it up together and it takes about 5 minutes."
+    },
+    "history": {
+      "empty": "Nothing here yet. Checks and alerts will show up here."
+    },
+    "settings": {
+      "language": "Language",
+      "account": "Account",
+      "safeWord": "The family word",
+      "safeWordChange": "Change the word",
+      "safeWordReauth": "For safety, sign in again before you change the word.",
+      "safeWordHashedNote": "We can't show you the word, because we don't keep it anywhere. You can change it, though."
+    }
+  },
+  "relations": {
+    "son": "Son",
+    "daughter": "Daughter",
+    "grandchild": "Grandchild",
+    "sibling": "Brother / sister",
+    "spouse": "Spouse",
+    "neighbour": "Neighbour",
+    "friend": "Friend",
+    "other": "Other"
+  },
+  "languages": {
+    "el": "Ελληνικά",
+    "en": "English"
+  }
+}

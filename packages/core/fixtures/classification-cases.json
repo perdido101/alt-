@@ -1,0 +1,32 @@
+{
+  "_comment": "Shared by packages/core (Vitest) and the Android call-screening module (Kotlin). Numbers are fictional.",
+  "context": {
+    "family": ["+306912345678", "+302101234567"],
+    "official": { "+302109999999": "police", "112": "emergency", "100": "police" },
+    "reputation": {
+      "+306980000001": { "approvedReports": 5, "flagged": false },
+      "+306980000002": { "approvedReports": 1, "flagged": false },
+      "+306980000003": { "approvedReports": 0, "flagged": true },
+      "+302109999999": { "approvedReports": 9, "flagged": true }
+    },
+    "reportThreshold": 3
+  },
+  "cases": [
+    { "raw": "6912345678", "expect": "family", "reason": "family" },
+    { "raw": "+30 691 234 5678", "expect": "family", "reason": "family" },
+    { "raw": "0030 210 123 4567", "expect": "family", "reason": "family" },
+    { "raw": "210 999 9999", "expect": "official", "reason": "official" },
+    { "raw": "112", "expect": "official", "reason": "official" },
+    { "raw": "100", "expect": "official", "reason": "official" },
+    { "raw": "6980000001", "expect": "reported_scam", "reason": "reported" },
+    { "raw": "6980000002", "expect": "unknown", "reason": "unknown" },
+    { "raw": "6980000003", "expect": "risky", "reason": "flagged" },
+    { "raw": "", "expect": "risky", "reason": "hidden" },
+    { "raw": "Private", "expect": "risky", "reason": "hidden" },
+    { "raw": "+44 20 7946 0958", "expect": "risky", "reason": "international" },
+    { "raw": "+234 803 123 4567", "expect": "risky", "reason": "international" },
+    { "raw": "12", "expect": "risky", "reason": "invalid" },
+    { "raw": "6977777777", "expect": "unknown", "reason": "unknown" },
+    { "raw": "2310 123456", "expect": "unknown", "reason": "unknown" }
+  ]
+}

@@ -1,0 +1,54 @@
+# Supabase CLI config for local development (`supabase start`).
+# Production project: EU region (eu-central-1 Frankfurt), see docs/SETUP.md.
+project_id = "alt"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 16
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+# Magic links open the app (guardian) or the web dashboard.
+additional_redirect_urls = ["alt://auth-callback", "exp+alt://auth-callback", "http://localhost:3000/auth/callback"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+# Parent devices sign in anonymously and are bound to a circle by accepting an invite.
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+otp_length = 6
+otp_expiry = 3600
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+template = "Ο κωδικός σου για την ΑΛΤ! είναι {{ .Code }}"
+
+# Real SMS provider is configured in the hosted project (see docs/SETUP.md). Locally, use test OTPs:
+[auth.sms.test_otp]
+306900000001 = "123456"
+
+[auth.rate_limit]
+email_sent = 10
+sms_sent = 10
+anonymous_users = 30
+sign_in_sign_ups = 30
+token_verifications = 30
