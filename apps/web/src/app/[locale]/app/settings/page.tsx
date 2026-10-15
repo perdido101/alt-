@@ -2,6 +2,7 @@ import { entitlements } from '@alt/core';
 import type { Locale } from '@alt/i18n';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { supabaseServer } from '@/server/auth';
+import { DeleteAccount } from '@/components/DeleteAccount';
 import { guardianCircle } from '@/server/dashboard';
 import { updateCircleSettings, updateNotificationPrefs } from '../actions';
 import { asLocale } from '@/i18n/locale';
@@ -76,6 +77,25 @@ export default async function Settings({ params, searchParams }: { params: Promi
         </ul>
         <p className="muted">{t('guardian.settings.safeWordHashedNote')}</p>
       </div>
+
+      <div className="card stack">
+        <h2>{t('dashboard.exportData')}</h2>
+        <p>{t('account.exportBody')}</p>
+        <a className="btn btn-outline" href="/api/account/export" download>
+          {t('dashboard.exportData')}
+        </a>
+      </div>
+      <DeleteAccount
+        labels={{
+          title: t('account.deleteTitle'),
+          body: t('account.deleteBody'),
+          type: t('account.deleteType'),
+          word: t('account.deleteWord'),
+          confirm: t('account.deleteConfirm'),
+          done: t('account.deleted'),
+          error: t('errors.generic'),
+        }}
+      />
     </>
   );
 }

@@ -87,7 +87,8 @@ export async function uploadCallEvents(): Promise<void> {
       circle_id: circleId,
       user_id: user.user!.id,
       client_ref: e.localId,
-      number_key: e.numberKey,
+      // Calls from family numbers are recorded without the number: the server never needs it.
+      number_key: e.classification === 'family' ? null : e.numberKey,
       number_kind: e.numberKind,
       classification: e.classification,
       protection_action: e.action,

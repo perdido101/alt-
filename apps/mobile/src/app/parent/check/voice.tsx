@@ -28,7 +28,8 @@ export default function VoiceNote() {
   const { colors } = useTheme();
   const locale = useAppStore((s) => s.locale);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const [mode, setMode] = useState<'speech' | 'audio' | null>(null);
+  // Decided once on mount: on-device speech recognition when available, otherwise record audio.
+  const [mode] = useState<'speech' | 'audio'>(() => (ExpoSpeechRecognitionModule.isRecognitionAvailable() ? 'speech' : 'audio'));
   const [listening, setListening] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [finalText, setFinalText] = useState('');
@@ -39,12 +40,21 @@ export default function VoiceNote() {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    setMode(ExpoSpeechRecognitionModule.isRecognitionAvailable() ? 'speech' : 'audio');
     return () => {
       if (timer.current) clearInterval(timer.current);
       ExpoSpeechRecognitionModule.abort();
     };
   }, []);
+
+  const startTimer = () => {
+    setSeconds(0);
+    setListening(true);
+    timer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+  };
+  const stopTimer = () => {
+    setListening(false);
+    if (timer.current) clearInterval(timer.current);
+  };
 
   useSpeechRecognitionEvent('result', (e) => {
     const text = e.results[0]?.transcript ?? '';
@@ -61,16 +71,6 @@ export default function VoiceNote() {
     stopTimer();
     if (e.error === 'not-allowed') setError(t('voice.micPermission'));
   });
-
-  const startTimer = () => {
-    setSeconds(0);
-    setListening(true);
-    timer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-  };
-  const stopTimer = () => {
-    setListening(false);
-    if (timer.current) clearInterval(timer.current);
-  };
 
   const start = async () => {
     setError(null);

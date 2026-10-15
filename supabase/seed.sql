@@ -173,5 +173,5 @@ insert into public.scam_radar_items (slug, category, title_el, title_en, summary
 
 -- Org aggregates (anonymised counts only) -----------------------------------------------------
 insert into public.org_stats_weekly (org_id, week_start, protected_people, checks, checks_scam, alerts, flagged_calls) values
-  ('00000000-0000-4000-8000-0000000000a1', (date_trunc('week', now()) - interval '2 weeks')::date, 1, 3, 1, 0, 2),
-  ('00000000-0000-4000-8000-0000000000a1', (date_trunc('week', now()) - interval '1 week')::date, 1, 2, 0, 1, 1);
+  ('00000000-0000-4000-8000-0000000000a1', (date_trunc('week', now()) - interval '2 weeks')::date, 7, 21, 6, 1, 9),
+  ('00000000-0000-4000-8000-0000000000a1', (date_trunc('week', now()) - interval '1 week')::date, 8, 25, 7, 2, 11);

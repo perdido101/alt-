@@ -24,7 +24,9 @@ export default function SetupCalls() {
     setHealth(CallShield?.getHealth() ?? null);
     void CallDirectory?.getDirectoryStatus().then(setDirectory);
   }, []);
-  useEffect(refresh, [refresh]);
+  useEffect(() => {
+    void CallDirectory?.getDirectoryStatus().then(setDirectory);
+  }, []);
 
   useEffect(() => {
     // Settings screens return here; re-read the state each time the app comes back.

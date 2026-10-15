@@ -17,7 +17,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm lint
       - run: pnpm test
+      # Report only: today's findings are in build-time tooling (Expo config plugins, Metro), not shipped code.
+      # See docs/SECURITY.md. Make this blocking once they have upstream fixes.
+      - run: pnpm audit --prod --audit-level high
+        continue-on-error: true
       # Applies all migrations + seed to a throwaway Postgres and runs the RLS/RPC tests.
       - run: pnpm db:test
 

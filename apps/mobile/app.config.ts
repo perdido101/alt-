@@ -60,6 +60,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     en: './locales/en.json',
   },
   plugins: [
+    // Uploads source maps on EAS builds when SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN are set.
+    ...(process.env.SENTRY_ORG ? [['@sentry/react-native/expo', { organization: process.env.SENTRY_ORG, project: process.env.SENTRY_PROJECT }] as [string, object]] : []),
     'expo-router',
     'expo-status-bar',
     'expo-secure-store',

@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 async function go(path: string, body: Record<string, string>) {
   const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const json = (await res.json().catch(() => ({}))) as { url?: string };
-  if (json.url) window.location.href = json.url;
+  if (json.url) {
+    track('checkout_started', { plan: body.plan ?? body.priceKey ?? 'unknown' });
+    window.location.href = json.url;
+  }
   return !!json.url;
 }
 

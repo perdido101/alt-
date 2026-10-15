@@ -5,7 +5,13 @@ import { HttpError, supabaseAdmin } from './supabase';
 
 export type Org = { id: string; slug: string; kind: string; nameEl: string; nameEn: string; seatsTotal: number; cobranding: boolean; logoPath: string | null };
 export type LicenceCode = { code: string; status: 'available' | 'redeemed' | 'revoked'; expiresAt: string | null; createdAt: string };
-export type WeekStat = { weekStart: string; protectedPeople: number; checks: number; checksScam: number; alerts: number; flaggedCalls: number };
+export type WeekStat = { weekStart: string; protectedPeople: number; checks: number | null; checksScam: number | null; alerts: number | null; flaggedCalls: number | null };
+
+/** Below this many protected people, activity counts could point to a household, so they are hidden. */
+export const MIN_GROUP_SIZE = 5;
+export function suppressSmallGroups(stats: WeekStat[]): WeekStat[] {
+  return stats.map((s) => (s.protectedPeople >= MIN_GROUP_SIZE ? s : { ...s, checks: null, checksScam: null, alerts: null, flaggedCalls: null }));
+}
 
 /**
  * Organisation portal data. The Supabase implementation runs as the org admin (RLS: their org's codes and
@@ -66,7 +72,7 @@ const supabaseRepo: OrgRepo = {
       checksScam: r.checks_scam as number,
       alerts: r.alerts as number,
       flaggedCalls: r.flagged_calls as number,
-    }));
+    })).map((x) => suppressSmallGroups([x])[0]!);
   },
 };
 
@@ -77,8 +83,9 @@ const demoCodes: LicenceCode[] = [
   { code: 'DEMO-H4PZ-2WLC', status: 'available', expiresAt: '2027-10-15T00:00:00Z', createdAt: '2026-09-01T09:00:00Z' },
 ];
 const demoStats: WeekStat[] = [
-  { weekStart: '2026-10-05', protectedPeople: 1, checks: 2, checksScam: 0, alerts: 1, flaggedCalls: 1 },
-  { weekStart: '2026-09-28', protectedPeople: 1, checks: 3, checksScam: 1, alerts: 0, flaggedCalls: 2 },
+  { weekStart: '2026-10-05', protectedPeople: 8, checks: 25, checksScam: 7, alerts: 2, flaggedCalls: 11 },
+  { weekStart: '2026-09-28', protectedPeople: 7, checks: 21, checksScam: 6, alerts: 1, flaggedCalls: 9 },
+  { weekStart: '2026-09-21', protectedPeople: 3, checks: null, checksScam: null, alerts: null, flaggedCalls: null },
 ];
 const demoRepo: OrgRepo = {
   async current() {
@@ -117,10 +124,11 @@ export function logoUrl(path: string | null): string | null {
 
 /** Org logo upload (service role after confirming the caller administers this org). */
 export async function uploadLogo(orgId: string, file: File): Promise<void> {
-  if (!['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'].includes(file.type) || file.size > 1024 * 1024) throw new HttpError(400, 'invalid_file');
+  // No SVG: it can carry scripts. Raster images only, up to 1 MB.
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 1024 * 1024) throw new HttpError(400, 'invalid_file');
   const org = await orgRepo().current();
   if (!org || org.id !== orgId) throw new HttpError(403, 'forbidden');
-  const ext = file.type === 'image/svg+xml' ? 'svg' : file.type.split('/')[1];
+  const ext = file.type.split('/')[1];
   const path = `${org.slug}/logo-${Date.now()}.${ext}`;
   const admin = supabaseAdmin();
   const { error } = await admin.storage.from('org-logos').upload(path, new Uint8Array(await file.arrayBuffer()), { contentType: file.type });
@@ -129,6 +137,6 @@ export async function uploadLogo(orgId: string, file: File): Promise<void> {
 }
 
 export function statsCsv(stats: WeekStat[], header: string[]): string {
-  const rows = stats.map((s) => [s.weekStart, s.protectedPeople, s.checks, s.checksScam, s.alerts, s.flaggedCalls].join(','));
+  const rows = stats.map((s) => [s.weekStart, s.protectedPeople, s.checks ?? '', s.checksScam ?? '', s.alerts ?? '', s.flaggedCalls ?? ''].join(','));
   return [header.map((h) => `"${h.replace(/"/g, '""')}"`).join(','), ...rows].join('\r\n') + '\r\n';
 }

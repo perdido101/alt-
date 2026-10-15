@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { runCheck, transcription } from '@/server/analysis';
 import { enforceLimit } from '@/server/rateLimit';
 import { HttpError, errorResponse, membershipFor, userFromRequest } from '@/server/supabase';
+import { trackServer } from '@/server/analytics';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -69,6 +70,11 @@ export async function POST(req: Request) {
     }
 
     const check = await runCheck({ input, locale, circleId: member.circleId, userId: user.id, channel: 'in_app', media });
+    trackServer('message_checked', {
+      userId: user.id,
+      optOut: req.headers.get('x-alt-analytics') === 'off',
+      props: { source: input.kind, verdict: check.result.verdict, category: check.result.category },
+    });
     return Response.json({ checkId: check.checkId, ...check.result, transcript });
   } catch (error) {
     return errorResponse(error);

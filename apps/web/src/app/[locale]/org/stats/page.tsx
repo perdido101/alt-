@@ -1,7 +1,7 @@
 import { localeTags } from '@alt/i18n';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { asLocale } from '@/i18n/locale';
-import { orgRepo } from '@/server/org';
+import { MIN_GROUP_SIZE, orgRepo } from '@/server/org';
 
 /** Anonymised weekly aggregates only; exportable as CSV for the council. */
 export default async function OrgStats({ params }: { params: Promise<{ locale: string }> }) {
@@ -17,6 +17,7 @@ export default async function OrgStats({ params }: { params: Promise<{ locale: s
       <a className="btn btn-outline" href={`/api/org/stats?locale=${locale}`} download>
         {t('downloadCsv')}
       </a>
+      <p className="muted">{t('suppressedNote', { min: MIN_GROUP_SIZE })}</p>
       {stats.length === 0 ? (
         <p className="card card-calm">{t('noStats')}</p>
       ) : (
@@ -37,10 +38,10 @@ export default async function OrgStats({ params }: { params: Promise<{ locale: s
                 <tr key={s.weekStart}>
                   <td>{new Date(s.weekStart).toLocaleDateString(localeTags[locale])}</td>
                   <td>{s.protectedPeople}</td>
-                  <td>{s.checks}</td>
-                  <td>{s.checksScam}</td>
-                  <td>{s.alerts}</td>
-                  <td>{s.flaggedCalls}</td>
+                  <td>{s.checks ?? '—'}</td>
+                  <td>{s.checksScam ?? '—'}</td>
+                  <td>{s.alerts ?? '—'}</td>
+                  <td>{s.flaggedCalls ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

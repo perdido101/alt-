@@ -24,6 +24,10 @@ type State = {
   setupProgress: number;
   setupDone: boolean;
   consented: boolean;
+  /** Device-level analytics opt-out (both modes). Error reports stay on: they hold no personal data. */
+  analyticsOptOut: boolean;
+  /** Random id for analytics, generated on first launch. Not linked to the account. */
+  installId: string | null;
 };
 
 type Actions = {
@@ -33,6 +37,8 @@ type Actions = {
   completeSetupStep: (step: SetupStep) => void;
   finishSetup: () => void;
   setConsented: (v: boolean) => void;
+  setAnalyticsOptOut: (v: boolean) => void;
+  setInstallId: (id: string) => void;
   reset: () => void;
 };
 
@@ -46,6 +52,8 @@ const initial: Omit<State, 'hydrated'> = {
   setupProgress: -1,
   setupDone: false,
   consented: false,
+  analyticsOptOut: false,
+  installId: null,
 };
 
 export const useAppStore = create<State & Actions>()(
@@ -61,7 +69,9 @@ export const useAppStore = create<State & Actions>()(
         set((s) => ({ setupProgress: Math.max(s.setupProgress, SETUP_STEPS.indexOf(step)) })),
       finishSetup: () => set({ setupDone: true, setupProgress: SETUP_STEPS.length - 1 }),
       setConsented: (consented) => set({ consented }),
-      reset: () => set({ ...initial }),
+      setAnalyticsOptOut: (analyticsOptOut) => set({ analyticsOptOut }),
+      setInstallId: (installId) => set({ installId }),
+      reset: () => set((s) => ({ ...initial, analyticsOptOut: s.analyticsOptOut, installId: s.installId })),
     }),
     {
       name: 'alt-app',

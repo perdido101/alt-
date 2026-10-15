@@ -50,6 +50,8 @@ export async function runCheck(params: {
   media?: { data: Uint8Array; mimeType: string };
 }): Promise<StoredCheck> {
   const outcome = await analyzeMessage(params.input, params.locale, { model: await modelForCircle(params.circleId) });
+  // Monitored (docs/OPERATIONS.md). Never log the message itself.
+  if (outcome.source === 'fallback') console.warn('analysis_fallback', outcome.result.verdict);
   const { data, error } = await supabaseAdmin()
     .from('checks')
     .insert({

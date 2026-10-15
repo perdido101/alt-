@@ -50,6 +50,10 @@ const schema = z.object({
   TWILIO_ACCOUNT_SID: z.string().min(1).optional(),
   TWILIO_AUTH_TOKEN: z.string().min(1).optional(),
   SMS_SENDER_ID: z.string().default('ALT'),
+  POSTHOG_KEY: z.string().min(1).optional(),
+  POSTHOG_HOST: z.string().url().default('https://eu.i.posthog.com'),
+  SENTRY_DSN: z.string().url().optional(),
+  INVOICING_PROVIDER: z.enum(['manual', 'mydata']).default('manual'),
   ALERT_ESCALATION_MINUTES: z.coerce.number().int().min(1).max(60).default(5),
 });
 

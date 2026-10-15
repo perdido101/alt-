@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 type Option = { key: 'gift_3m' | 'gift_6m' | 'gift_12m'; label: string; price: string };
 type Labels = { email: string; recipient: string; buy: string; error: string };
@@ -22,7 +23,10 @@ export function GiftForm({ options, labels, locale }: { options: Option[]; label
       body: JSON.stringify({ priceKey, email: email || undefined, recipientName: recipientName || undefined, locale }),
     }).catch(() => null);
     const json = (await res?.json().catch(() => null)) as { url?: string } | null;
-    if (json?.url) window.location.href = json.url;
+    if (json?.url) {
+      track('checkout_started', { plan: 'gift', interval: priceKey });
+      window.location.href = json.url;
+    }
     else {
       setError(true);
       setBusy(false);

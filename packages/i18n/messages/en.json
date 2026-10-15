@@ -190,7 +190,17 @@
       "title": "Enter your PIN",
       "setTitle": "Would you like a PIN for the app?",
       "setBody": "Optional. 4 numbers you'll remember.",
-      "wrong": "That's not it. Try again."
+      "wrong": "That's not it. Try again.",
+      "confirm": "Type it once more",
+      "mismatch": "They don't match. Start again.",
+      "set": "Set a PIN",
+      "skip": "No, thanks",
+      "saved": "PIN saved.",
+      "lockedOut": "Too many wrong tries. Try again in a minute.",
+      "forgot": "Forgot your PIN? Ask your family to reinstall ΑΛΤ! and send you a new invitation.",
+      "digit": "Digit {digit}",
+      "delete": "Delete digit",
+      "entered": "{count} of 4"
     }
   },
   "guardian": {
@@ -794,6 +804,24 @@
     "sponsoredBy": "Supported by the Municipality of {name}",
     "sponsoredByOrg": "Supported by {name}",
     "landingCode": "Have a code from your municipality? Enter it in the app under Settings → Subscription.",
-    "municipality": "Municipality of {name}"
+    "municipality": "Municipality of {name}",
+    "suppressedNote": "To protect families, activity numbers are hidden (—) in weeks with fewer than {min} people taking part."
+  },
+  "account": {
+    "deleteTitle": "Delete account",
+    "deleteBody": "Your account will be deleted. If you are a family's only guardian, the whole family and its history will be deleted and the subscription cancelled. This can't be undone.",
+    "deleteType": "Type DELETE to confirm",
+    "deleteWord": "DELETE",
+    "deleteConfirm": "Delete permanently",
+    "deleted": "Your account has been deleted.",
+    "exportBody": "Everything we hold about you, as a JSON file.",
+    "leaveTitle": "Leave the family",
+    "leaveBody": "Your family will no longer see your checks and alerts, and ΑΛΤ! will stop protecting you. Your history will be deleted.",
+    "leaveConfirm": "Yes, I want to leave",
+    "lastGuardian": "You are the last guardian. Add another guardian before you leave.",
+    "removeMember": "Remove from the family",
+    "removeMemberBody": "Use this if they changed phones: remove the old one and send a new invitation.",
+    "analytics": "Anonymous usage statistics",
+    "analyticsSub": "They help us improve the app. Never messages, names or numbers."
   }
 }

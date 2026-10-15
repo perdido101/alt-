@@ -9,6 +9,7 @@ import { Card } from '@/components/Card';
 import { Choice } from '@/components/Choice';
 import { Screen } from '@/components/Screen';
 import { updateProfile } from '@/lib/api';
+import { confirmDeleteAccount, exportMyData } from '@/lib/account';
 import { useSafeWordStatus } from '@/lib/queries';
 import { useCircleSettings, useProtectionLevel, useUpdateCircle } from '@/lib/settings';
 import { TextField } from '@/components/TextField';
@@ -22,7 +23,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 export default function GuardianSettings() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { locale, setLocale, reset } = useAppStore();
+  const { locale, setLocale, reset, analyticsOptOut, setAnalyticsOptOut } = useAppStore();
   const safeWord = useSafeWordStatus();
   const protection = useProtectionLevel();
   const circle = useCircleSettings();
@@ -45,9 +46,9 @@ export default function GuardianSettings() {
   const [redeemMsg, setRedeemMsg] = useState<string | null>(null);
   const redeem = async () => {
     const circleId = useAppStore.getState().circleId;
-    let { error } = await supabase.rpc('redeem_gift_code', { p_circle: circleId, p_code: code });
-    if (error && /code_invalid/.test(error.message)) ({ error } = await supabase.rpc('redeem_licence_code', { p_circle: circleId, p_code: code }));
-    setRedeemMsg(!error ? t('dashboard.redeemed') : /already_subscribed/.test(error.message) ? t('dashboard.redeemAlreadySubscribed') : t('dashboard.redeemInvalid'));
+    const { data } = await supabase.rpc('redeem_code', { p_circle: circleId, p_code: code });
+    const status = (data as { status?: string } | null)?.status;
+    setRedeemMsg(status === 'ok' ? t('dashboard.redeemed') : status === 'already_subscribed' ? t('dashboard.redeemAlreadySubscribed') : t('dashboard.redeemInvalid'));
     await qc.invalidateQueries({ queryKey: ['circleSettings'] });
   };
   const plan = circle.data?.plan as 'free' | 'family' | 'family_plus' | undefined;
@@ -109,6 +110,15 @@ export default function GuardianSettings() {
         </AppText>
         <BigButton variant="outline" label={t('guardian.settings.safeWordChange')} onPress={() => router.push('/guardian/safe-word')} />
       </Card>
+      <Choice
+        label={t('account.analytics')}
+        sub={t('account.analyticsSub')}
+        selected={!analyticsOptOut}
+        kind="checkbox"
+        onPress={() => setAnalyticsOptOut(!analyticsOptOut)}
+      />
+      <BigButton variant="outline" label={t('dashboard.exportData')} onPress={() => void exportMyData()} />
+      <BigButton variant="plain" label={t('account.deleteTitle')} onPress={() => confirmDeleteAccount(() => router.replace('/welcome'))} />
       <BigButton
         variant="outline"
         label={t('auth.signOut')}

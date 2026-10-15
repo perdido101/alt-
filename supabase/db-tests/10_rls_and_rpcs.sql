@@ -325,16 +325,16 @@ insert into public.gift_codes (code, plan, months) values ('GIFT-TEST-0001', 'fa
 select tests.login('00000000-0000-4000-8000-000000000102', false);
 set role authenticated;
 select tests.eq((select count(*) from public.gift_codes), 0::bigint, 'gift codes hidden');
-select public.redeem_gift_code(:'new_circle', 'gift-test-0001');
+select tests.eq((public.redeem_code(:'new_circle', 'gift-test-0001')) ->> 'status', 'ok', 'gift redeemed');
 select tests.eq((select plan::text from public.circles where id = :'new_circle'), 'family', 'gift upgrades the circle');
 select tests.eq((select provider from public.subscriptions where circle_id = :'new_circle'), 'gift', 'gift subscription');
-select tests.expect_error(format($$select public.redeem_gift_code(%L, 'GIFT-TEST-0001')$$, :'new_circle'), 'code_invalid');
+select tests.eq((public.redeem_code(:'new_circle', 'GIFT-TEST-0001')) ->> 'status', 'invalid', 'gift code used twice');
 reset role;
 -- Stripe-subscribed circles can't stack a gift.
 update public.subscriptions set provider = 'stripe' where circle_id = :'circle';
 select tests.login(:'giannis');
 set role authenticated;
-select tests.expect_error(format($$select public.redeem_gift_code(%L, 'GIFT-TEST-0002')$$, :'circle'), 'already_subscribed');
+select tests.eq((public.redeem_code(:'circle', 'GIFT-TEST-0002')) ->> 'status', 'already_subscribed', 'no stacking on stripe');
 reset role;
 select tests.eq((select email from public.profiles where id = :'giannis'), 'giannis@example.com', 'profile email synced');
 
@@ -355,14 +355,15 @@ reset role;
 select tests.login('00000000-0000-4000-8000-000000000101');
 set role authenticated;
 select public.create_circle('Οικογένεια Δοκιμής', 'Stranger') as lic_circle \gset
-select public.redeem_licence_code(:'lic_circle', lower(:'lic_code'));
+select tests.eq((public.redeem_code(:'lic_circle', lower(:'lic_code'))) ->> 'kind', 'licence', 'licence redeemed via redeem_code');
 select tests.eq((select plan::text from public.circles where id = :'lic_circle'), 'family', 'licence upgrades circle');
 select tests.eq((select sponsor_org_id from public.circles where id = :'lic_circle'), '00000000-0000-4000-8000-0000000000a1'::uuid, 'sponsor set');
 select tests.eq((select name_el from public.circle_sponsor(:'lic_circle')), 'Δοκιμής', 'circle sees its sponsor');
-select tests.expect_error(format($$select public.redeem_licence_code(%L, %L)$$, :'lic_circle', :'lic_code'), 'code_invalid');
+select tests.eq((public.redeem_code(:'lic_circle', :'lic_code')) ->> 'status', 'invalid', 'licence used twice');
 reset role;
 select tests.eq(public.compute_org_stats(date_trunc('week', now())::date) >= 1, true, 'stats computed');
 select tests.eq((select protected_people from public.org_stats_weekly where org_id = '00000000-0000-4000-8000-0000000000a1' and week_start = date_trunc('week', now())::date), 1, 'one protected person sponsored');
+select tests.eq((select checks from public.org_stats_weekly where org_id = '00000000-0000-4000-8000-0000000000a1' and week_start = date_trunc('week', now())::date), null::integer, 'counts hidden below 5 people');
 set role anon;
 select tests.eq((select name_el from public.org_branding('demo')), 'Δοκιμής', 'public co-branding');
 reset role;
@@ -371,4 +372,30 @@ select tests.login(:'dimos');
 set role authenticated;
 select tests.eq((select count(*) from public.circles), 0::bigint, 'org admin sees no circles after redemption');
 select tests.eq((select count(*) from public.circle_members), 0::bigint, 'org admin sees no members');
+reset role;
+
+-- Hardening (milestone 7)
+select tests.login('00000000-0000-4000-8000-000000000101');
+set role authenticated;
+select tests.expect_error($$select public.redeem_gift_code('00000000-0000-4000-8000-0000000000c1', 'x')$$, 'permission denied');
+do $$ begin for i in 1..12 loop perform public.redeem_code((select circle_id from public.circle_members where user_id = auth.uid() limit 1), 'NOPE-0000-' || i); end loop; end $$;
+select tests.eq((public.redeem_code(:'lic_circle', 'NOPE-XXXX-XXXX')) ->> 'status', 'rate_limited', 'code guessing is rate limited');
+select tests.eq((public.export_my_data() -> 'profile' ->> 'email'), 'stranger@example.com', 'export contains own profile');
+select tests.eq((public.export_my_data() -> 'profile') ? 'is_admin', false, 'export hides internal flags');
+reset role;
+-- A parent leaving deletes their activity in that circle
+select tests.login(:'maria', true);
+set role authenticated;
+select tests.eq((jsonb_array_length(public.export_my_data() -> 'checks')) > 0, true, 'parent export has checks');
+select public.leave_circle(:'circle');
+select tests.eq((select count(*) from public.checks where user_id = auth.uid()), 0::bigint, 'checks deleted on leaving');
+reset role;
+select tests.eq((select count(*) from public.circle_members where user_id = :'maria'), 0::bigint, 'parent left');
+select tests.login(:'giannis');
+set role authenticated;
+select public.leave_circle(:'circle');
+reset role;
+select tests.login(:'eleni');
+set role authenticated;
+select public.leave_circle(:'circle');
 reset role;

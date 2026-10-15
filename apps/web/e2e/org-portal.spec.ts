@@ -45,7 +45,8 @@ test('stats are anonymous and export as CSV', async ({ page }) => {
   expect(res.headers()['content-type']).toContain('text/csv');
   const csv = await res.text();
   expect(csv.split('\r\n')[0]).toContain('Εβδομάδα');
-  expect(csv).toContain('2026-10-05,1,2,0,1,1');
+  expect(csv).toContain('2026-10-05,8,25,7,2,11');
+  expect(csv).toContain('2026-09-21,3,,,,');
   expect(csv).not.toMatch(/@|\+30|Μαρία/);
 });
 

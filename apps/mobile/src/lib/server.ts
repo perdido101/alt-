@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { analyticsHeader } from './analytics';
 import { supabase } from './supabase';
 
 /** Base URL of the ΑΛΤ! server routes (the Next.js app on Vercel). */
@@ -22,7 +23,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   try {
     res = await fetch(`${apiUrl}${path}`, {
       ...init,
-      headers: { ...(init.headers ?? {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { ...(init.headers ?? {}), ...analyticsHeader(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     });
   } catch {
     throw new ApiError(0, 'network');

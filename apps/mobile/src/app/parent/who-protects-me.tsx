@@ -5,6 +5,7 @@ import { AppText } from '@/components/AppText';
 import { BigButton } from '@/components/BigButton';
 import { GuardianList } from '@/components/GuardianList';
 import { Screen } from '@/components/Screen';
+import { confirmLeaveCircle } from '@/lib/account';
 
 /** "Ποιος με προστατεύει": the consent text and the guardians, available any time from home. */
 export default function WhoProtectsMe() {
@@ -18,6 +19,7 @@ export default function WhoProtectsMe() {
       <GuardianList />
       <AppText>{t('consent.body')}</AppText>
       <AppText>{t('consent.detail')}</AppText>
+      <BigButton variant="plain" label={t('account.leaveTitle')} onPress={() => confirmLeaveCircle(() => router.replace('/welcome'))} />
     </Screen>
   );
 }

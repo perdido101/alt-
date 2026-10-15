@@ -18,7 +18,7 @@ export default async function OrgBranding({ params }: { params: Promise<{ locale
       <form action={uploadOrgLogo} className="card stack">
         <h2>{t('logo')}</h2>
         {logo ? <img src={logo} alt={t('logo')} style={{ maxHeight: 96, width: 'auto' }} /> : null}
-        <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml,image/webp" required />
+        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required />
         <button className="btn btn-primary">{t('upload')}</button>
       </form>
     </>

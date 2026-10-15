@@ -6,6 +6,7 @@ import { scheduleJob } from './jobs/schedule';
 import { notifier } from './notify/notifier';
 import { smsProvider } from './notify/sms';
 import { HttpError, supabaseAdmin } from './supabase';
+import { trackServer } from './analytics';
 
 const DEDUPE_MINUTES = 10;
 
@@ -115,6 +116,7 @@ export async function createAlert(req: AlertRequest): Promise<{ alertId: string;
 
   await scheduleJob('/api/alerts/escalate', { alertId }, minutes * 60, `escalate-${alertId}`);
   await db.from('audit_log').insert({ actor_id: req.userId, action: 'alert.create', entity: 'alert', entity_id: alertId, circle_id: member.circle_id, meta: { source: req.source } });
+  trackServer('family_alert_sent', { userId: req.userId, props: { source: req.source } });
   return { alertId, deduplicated: false };
 }
 
@@ -158,5 +160,6 @@ export async function escalateAlert(alertId: string): Promise<{ escalated: boole
   );
   if (rows.length) await db.from('alert_deliveries').insert(rows);
   if (rows.length === 0 || rows.every((r) => r.status === 'failed')) console.error('alert_escalation_undelivered', alertId);
+  trackServer('family_alert_escalated', { props: { channel: 'sms' } });
   return { escalated: true, sms: rows.filter((r) => r.status === 'sent').length };
 }

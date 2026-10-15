@@ -15,3 +15,5 @@ jest.mock('expo-secure-store', () => {
     __store: store,
   };
 });
+
+jest.mock('@sentry/react-native', () => ({ init: jest.fn(), wrap: (c: unknown) => c }));

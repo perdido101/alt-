@@ -15,8 +15,8 @@ up and pays; the parent (the **protected person**) just uses it. Greek and Engli
 | Path | What |
 |---|---|
 | `apps/mobile` | Expo (React Native, TypeScript) app with a dev client. One app, parent and guardian modes. |
-| `apps/web` | Next.js website, Scam Radar, dashboard, org portal (milestone 5) |
-| `packages/core` | Shared types, zod schemas, phone normalisation, call classification, safe-word normalisation, invite links, plans |
+| `apps/web` | Next.js website, Scam Radar, guardian dashboard, org portal, admin, and all server routes (API, webhooks, cron) |
+| `packages/core` | Shared types, zod schemas, phone normalisation, call classification, safe word, invites, plans, scam analysis (Claude + rules), telemetry |
 | `packages/i18n` | `el.json` / `en.json` (ICU MessageFormat), shared by mobile and web |
 | `packages/tokens` | Design tokens for React Native + generated `tokens.css` |
 | `supabase` | Migrations (schema, RPCs, RLS), seed, SQL tests |
@@ -47,33 +47,36 @@ parent Μαρία, backup neighbour κ. Νίκος. The demo safe word is `λε�
 
 ## Status
 
+All seven milestones are built. What still needs accounts, people or decisions is listed in
+[`docs/SETUP.md`](docs/SETUP.md) and [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 | Milestone | State |
 |---|---|
-| 1. Foundations | ✅ done (see below) |
-| 2. Scam-check bot | not started |
-| 3. Family alert | not started |
-| 4. Call Shield (Android) | not started |
-| 5. Guardian dashboard + website | not started |
-| 6. Organisation portal + iOS | not started |
-| 7. Hardening | not started |
+| 1. Foundations | ✅ |
+| 2. Scam-check bot | ✅ (Viber / WhatsApp adapters built, off behind feature flags) |
+| 3. Family alert | ✅ |
+| 4. Call Shield (Android) | ✅ (needs real-device testing, see `docs/PERMISSIONS.md`) |
+| 5. Guardian dashboard + website + Stripe + quizzes | ✅ (store billing stubbed; web checkout) |
+| 6. Organisation portal + iOS | ✅ (myDATA invoicing manual, see `docs/INVOICING.md`) |
+| 7. Hardening | ✅ PIN, analytics, Sentry, GDPR export/delete, abuse limits, CSP, docs |
 
-### Milestone 1: what works
+## Docs
 
-- Monorepo (pnpm + Turborepo), shared `core`, `i18n` (el/en) and `tokens` packages; CI workflow.
-- Supabase schema for every table in the brief (+ `org_members`, `devices`), RLS on all of them, RPCs for
-  circles, invites, consent and the safe word; SQL tests covering guardian / parent / stranger / org admin /
-  anonymous / admin access and the whole onboarding flow.
-- Mobile: welcome → guardian sign-in (magic link or code, email or SMS) → create circle → invite with QR /
-  share link → parent scans or pastes the link, gets an anonymous device-bound session → consent screen →
-  setup steps 1 (language + text size), 3 (family numbers, contact picker) and 4 (safe word) → parent home.
-  Guardian tabs: Αρχική, Ιστορικό, Οικογένεια, Ρυθμίσεις. "Ποιος με προστατεύει" screen. Read-aloud on home.
+| File | What |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | how it fits together |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | product/legal decisions to review |
+| [`docs/SETUP.md`](docs/SETUP.md) | every account, key and environment variable |
+| [`docs/PERMISSIONS.md`](docs/PERMISSIONS.md) | Android/iOS permissions and store declarations |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | security review, fixed items, open items |
+| [`docs/ROPA.md`](docs/ROPA.md) | GDPR records of processing (draft) |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | monitoring, health check, cron jobs, releases |
+| [`docs/INVOICING.md`](docs/INVOICING.md) | invoicing organisations through myDATA |
+| [`docs/STORE_LISTINGS.md`](docs/STORE_LISTINGS.md) | App Store / Play texts in Greek and English |
+| [`TRANSLATION_NOTES.md`](TRANSLATION_NOTES.md) | Greek copy to review |
 
-### Milestone 1: stubbed
+## Turning on Viber and WhatsApp
 
-- Setup steps 2 (call protection) and 5 (test call): placeholder screens until milestone 4.
-- Home tiles and the "Κάποιος μου ζητάει λεφτά" button open a placeholder until milestones 2–4.
-- Optional 4-digit parent PIN: not built yet (planned with milestone 3).
-- Guardian re-authentication flow for changing the safe word (the database already enforces it).
-- Guardian timeline, setup health, digest: milestone 5.
-- `apps/web` isn't scaffolded yet, so `https://<site>/j/<token>` links only work through the in-app
-  scanner / paste box until the web fallback page and App Links files ship in milestone 5.
+Both bots are built and tested but off. After the business accounts are approved, set the variables in
+`docs/SETUP.md` §14 in Vercel, register the webhook URL, and flip `FEATURE_VIBER=on` /
+`FEATURE_WHATSAPP=on`. The app's message-check screen offers linking the chat only when the flag is on.

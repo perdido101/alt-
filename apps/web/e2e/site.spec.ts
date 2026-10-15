@@ -120,3 +120,20 @@ test.describe('invites and app links', () => {
     expect((await res.json())[0].target.namespace).toBe('android_app');
   });
 });
+
+test.describe('operations', () => {
+  test('health check answers without secrets', async ({ request }) => {
+    const res = await request.get('/api/health?deep=1');
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe('ok');
+    expect(typeof body.integrations.analysis).toBe('boolean');
+    expect(JSON.stringify(body)).not.toMatch(/sk_|key|token/i);
+  });
+
+  test('security headers are set', async ({ request }) => {
+    const res = await request.get('/el');
+    expect(res.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
+    expect(res.headers()['strict-transport-security']).toContain('max-age=');
+  });
+});

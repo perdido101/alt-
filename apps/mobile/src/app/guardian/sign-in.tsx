@@ -1,10 +1,9 @@
-import { EmailInput } from '@alt/core';
+import { EmailInput , normalisePhone } from '@alt/core';
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { normalisePhone } from '@alt/core';
 import { spacing } from '@alt/tokens';
 import { AppText } from '@/components/AppText';
 import { BigButton } from '@/components/BigButton';

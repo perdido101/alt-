@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 type Labels = Record<'org' | 'orgType' | 'name' | 'email' | 'phone' | 'message' | 'send' | 'sent' | 'error', string> & { types: Record<string, string> };
 
@@ -15,6 +16,7 @@ export function B2BForm({ labels, locale }: { labels: Labels; locale: string }) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, kind: 'b2b', locale }),
     }).catch(() => null);
+    if (res?.ok) track('b2b_form_submitted', { kind: 'b2b' });
     setState(res?.ok ? 'sent' : 'error');
   };
   if (state === 'sent')

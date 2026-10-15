@@ -26,6 +26,20 @@ brief is used verbatim and is not listed here.
 | `auth.subtitle` | Θα σου στείλουμε έναν σύνδεσμο. Δεν χρειάζεται κωδικός. | "κωδικός" is also used for the one-time code; might confuse. |
 | `consent.detail` | Δεν βλέπουν τα μηνύματά σου… | Legal review of the consent wording (GDPR). |
 
+## Added in milestones 2–7
+
+| Key | Greek | Question |
+|---|---|---|
+| `verdict.*Title` | Πολύ πιθανή απάτη / Πρόσεξε / Μάλλον ασφαλές | "Μάλλον ασφαλές" deliberately avoids certainty. Check it doesn't sound dismissive. |
+| `verdict.askGuardian`, `alert.callNow`, `guardianAlert.callParent` | Ρώτα τον/την {name}, Πάρε τον/την {name} τώρα | Slash forms with a name. Fix with gender `select` (proposal above), or rephrase: "Ρώτα: {name}", "Τηλεφώνησε στη/στον…". |
+| `call.unsure` (after-call) | Δεν είμαι σίγουρη, θα σου πω | Feminine (from the brief). Needs the gender field; masculine "σίγουρος". |
+| `guardianAlert.banner` | {name} ζήτησε βοήθεια | Greek normally uses the article with names ("Η Μαρία ζήτησε…"). Needs gender too. |
+| `org.sponsoredBy` | Με τη στήριξη του Δήμου {name} | `{name}` must be the genitive ("Αθηναίων", "Θεσσαλονίκης"). Today the org types it in that form; add a hint in the portal or a `name_el_genitive` field. KAPI/companies need a different phrase ("Με τη στήριξη της {name}"). |
+| `parent.pin.forgot` | Ξέχασες το PIN; Ζήτα από την οικογένεια… | Check tone; "εγκαταστήσει ξανά" may be too technical for the parent. |
+| `account.analytics` | Ανώνυμα στατιστικά χρήσης | Legal: is "ανώνυμα" accurate for pseudonymous install ids? Maybe "Στατιστικά χρήσης χωρίς προσωπικά στοιχεία". |
+| `org.suppressedNote` | Για την προστασία των οικογενειών… | Check wording for municipal staff. |
+| `callOrgArticle.*` | article agreement for organisations ("την Αστυνομία", "το ΕΚΑΒ", "τη ΔΕΗ") | Stored per official number (`article_el`); admin must fill it for new entries. |
+
 ## English
 
 - "Guardian" for the adult child, "Protected" for the parent: product terms, may change.

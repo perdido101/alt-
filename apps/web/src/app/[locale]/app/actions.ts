@@ -35,11 +35,11 @@ export async function redeemCode(_prev: string | null, formData: FormData): Prom
   const circleId = z.string().uuid().parse(formData.get('circleId'));
   const code = z.string().trim().min(4).max(40).parse(formData.get('code'));
   const db = await supabaseServer();
-  // Gift codes and municipality licence codes share one box: try a gift code, then a licence code.
-  let { error } = await db.rpc('redeem_gift_code', { p_circle: circleId, p_code: code });
-  if (error && /code_invalid/.test(error.message)) ({ error } = await db.rpc('redeem_licence_code', { p_circle: circleId, p_code: code }));
+  // Gift codes and municipality licence codes share one box; the RPC tries both and rate-limits guessing.
+  const { data } = await db.rpc('redeem_code', { p_circle: circleId, p_code: code });
   revalidatePath('/[locale]/app', 'layout');
-  if (!error) return 'ok';
-  if (/already_subscribed/.test(error.message)) return 'already';
+  const status = (data as { status?: string } | null)?.status;
+  if (status === 'ok') return 'ok';
+  if (status === 'already_subscribed') return 'already';
   return 'invalid';
 }

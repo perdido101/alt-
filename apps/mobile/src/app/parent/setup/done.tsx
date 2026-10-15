@@ -8,6 +8,7 @@ import { BigButton } from '@/components/BigButton';
 import { Screen } from '@/components/Screen';
 import { useAppStore } from '@/lib/store';
 import { useTheme } from '@/theme/ThemeProvider';
+import { track } from '@/lib/analytics';
 
 export default function SetupDone() {
   const { t } = useTranslation();
@@ -15,15 +16,27 @@ export default function SetupDone() {
   return (
     <Screen
       footer={
-        <BigButton
-          testID="setup-finish"
-          size="lg"
-          label={t('common.done')}
-          onPress={() => {
-            useAppStore.getState().finishSetup();
-            router.replace('/parent/home');
-          }}
-        />
+        <>
+          <BigButton
+            testID="setup-finish"
+            size="lg"
+            label={t('common.done')}
+            onPress={() => {
+              useAppStore.getState().finishSetup();
+              track('setup_completed', { mode: 'parent' });
+              router.replace('/parent/home');
+            }}
+          />
+          <BigButton
+            variant="plain"
+            label={t('parent.pin.set')}
+            onPress={() => {
+              useAppStore.getState().finishSetup();
+              track('setup_completed', { mode: 'parent' });
+              router.replace('/parent/pin-setup');
+            }}
+          />
+        </>
       }
     >
       <View style={{ alignItems: 'center', gap: spacing.lg, marginTop: spacing.xxl }}>
