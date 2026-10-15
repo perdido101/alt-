@@ -337,3 +337,38 @@ set role authenticated;
 select tests.expect_error(format($$select public.redeem_gift_code(%L, 'GIFT-TEST-0002')$$, :'circle'), 'already_subscribed');
 reset role;
 select tests.eq((select email from public.profiles where id = :'giannis'), 'giannis@example.com', 'profile email synced');
+
+-- Organisations (milestone 6)
+select tests.login(:'dimos');
+set role authenticated;
+select count(*) as generated from public.generate_licence_codes('00000000-0000-4000-8000-0000000000a1', 3) \gset
+select tests.eq(:'generated'::int, 3, 'org admin generates codes');
+select tests.eq((select count(*) from public.org_licence_codes where code like 'DEMO-%'), 3::bigint, 'codes carry the org prefix');
+select tests.expect_error($$select * from public.generate_licence_codes('00000000-0000-4000-8000-0000000000a1', 100)$$, 'not_enough_seats');
+select code as lic_code from public.org_licence_codes where code like 'DEMO-%' limit 1 \gset
+reset role;
+select tests.login(:'giannis');
+set role authenticated;
+select tests.expect_error($$select * from public.generate_licence_codes('00000000-0000-4000-8000-0000000000a1', 1)$$, 'forbidden');
+reset role;
+-- A guardian of a free circle redeems it
+select tests.login('00000000-0000-4000-8000-000000000101');
+set role authenticated;
+select public.create_circle('Οικογένεια Δοκιμής', 'Stranger') as lic_circle \gset
+select public.redeem_licence_code(:'lic_circle', lower(:'lic_code'));
+select tests.eq((select plan::text from public.circles where id = :'lic_circle'), 'family', 'licence upgrades circle');
+select tests.eq((select sponsor_org_id from public.circles where id = :'lic_circle'), '00000000-0000-4000-8000-0000000000a1'::uuid, 'sponsor set');
+select tests.eq((select name_el from public.circle_sponsor(:'lic_circle')), 'Δοκιμής', 'circle sees its sponsor');
+select tests.expect_error(format($$select public.redeem_licence_code(%L, %L)$$, :'lic_circle', :'lic_code'), 'code_invalid');
+reset role;
+select tests.eq(public.compute_org_stats(date_trunc('week', now())::date) >= 1, true, 'stats computed');
+select tests.eq((select protected_people from public.org_stats_weekly where org_id = '00000000-0000-4000-8000-0000000000a1' and week_start = date_trunc('week', now())::date), 1, 'one protected person sponsored');
+set role anon;
+select tests.eq((select name_el from public.org_branding('demo')), 'Δοκιμής', 'public co-branding');
+reset role;
+-- The org admin still can't see who redeemed.
+select tests.login(:'dimos');
+set role authenticated;
+select tests.eq((select count(*) from public.circles), 0::bigint, 'org admin sees no circles after redemption');
+select tests.eq((select count(*) from public.circle_members), 0::bigint, 'org admin sees no members');
+reset role;

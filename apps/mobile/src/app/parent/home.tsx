@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { CircleCheck, HandCoins, KeyRound, MessageSquareText, PhoneIncoming, Volume2 } from 'lucide-react-native';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { radii, spacing } from '@alt/tokens';
@@ -11,6 +12,7 @@ import { Wordmark } from '@/components/Wordmark';
 import { greetingKey } from '@/lib/greeting';
 import { readAloud } from '@/lib/speech';
 import { useAppStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/theme/ThemeProvider';
 
 /**
@@ -20,7 +22,18 @@ import { useTheme } from '@/theme/ThemeProvider';
 export default function ParentHome() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { displayName, locale } = useAppStore();
+  const { displayName, locale, circleId } = useAppStore();
+  // "Με τη στήριξη του Δήμου …" when a municipality sponsors this family and enabled co-branding.
+  const sponsor = useQuery({
+    queryKey: ['sponsor', circleId],
+    enabled: !!circleId,
+    staleTime: 86_400_000,
+    queryFn: async () => {
+      const { data } = await supabase.rpc('circle_sponsor', { p_circle: circleId });
+      return ((data as Array<{ name_el: string; name_en: string; kind: string }> | null) ?? [])[0] ?? null;
+    },
+  });
+  const sponsorName = sponsor.data ? (locale === 'el' ? sponsor.data.name_el : sponsor.data.name_en) : null;
   const greeting = t(greetingKey(), { name: displayName ?? '' });
 
   const tiles = {
@@ -110,6 +123,11 @@ export default function ParentHome() {
           {t('consent.whoProtectsMe')}
         </AppText>
       </Pressable>
+      {sponsorName ? (
+        <AppText variant="small" color={colors.textSoft} center>
+          {sponsor.data?.kind === 'municipality' ? t('org.sponsoredBy', { name: sponsorName }) : t('org.sponsoredByOrg', { name: sponsorName })}
+        </AppText>
+      ) : null}
     </Screen>
   );
 }

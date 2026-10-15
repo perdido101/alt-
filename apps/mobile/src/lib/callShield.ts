@@ -1,4 +1,4 @@
-import { CallShield, type QueuedEvent, type ScreenedEvent, type ScreeningCacheFile } from '../../modules/call-shield';
+import { CallDirectory, CallShield, type QueuedEvent, type ScreenedEvent, type ScreeningCacheFile } from '../../modules/call-shield';
 import { DEFAULT_REPORT_THRESHOLD } from '@alt/core';
 import { palette } from '@alt/tokens';
 import * as BackgroundTask from 'expo-background-task';
@@ -36,7 +36,8 @@ async function fetchAll<T>(build: (from: number, to: number) => PromiseLike<{ da
 /** Downloads family numbers, the official directory and reputation into the on-device screening cache. */
 export async function syncScreeningCache(): Promise<void> {
   const { circleId, locale } = useAppStore.getState();
-  if (!CallShield || !circleId) return;
+  const target = CallShield ?? CallDirectory;
+  if (!target || !circleId) return;
   if (i18n.language !== locale) await i18n.changeLanguage(locale);
 
   const [{ data: circle }, { data: family }, official, reputation] = await Promise.all([
@@ -67,7 +68,7 @@ export async function syncScreeningCache(): Promise<void> {
     strings: nativeStrings(),
     colors: { surface: palette.callSurface, onSurface: palette.white, accent: palette.ember },
   };
-  CallShield.writeCache(JSON.stringify(cache));
+  target.writeCache(JSON.stringify(cache));
 }
 
 /** Uploads calls the phone screened while offline (or while the app was closed) to call_events. */
@@ -106,7 +107,11 @@ export async function uploadCallEvents(): Promise<void> {
 /** Sends this phone's protection status to the server, for the guardian's setup-health warnings. */
 export async function reportHealth(): Promise<void> {
   const info = deviceInfo();
-  const health = CallShield ? CallShield.getHealth() : { supported: false, platform: Platform.OS };
+  const health = CallShield
+    ? CallShield.getHealth()
+    : CallDirectory
+      ? { supported: true, platform: 'ios', callDirectory: await CallDirectory.getDirectoryStatus().catch(() => 'unknown') }
+      : { supported: false, platform: Platform.OS };
   await supabase.rpc('register_device', { p_platform: info.platform, p_app_version: info.appVersion, p_os_version: info.osVersion, p_health: health });
 }
 

@@ -17,6 +17,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
   ios: {
     bundleIdentifier: bundleId,
+    appleTeamId: process.env.APPLE_TEAM_ID,
+    // Shared with the Call Directory Extension (targets/calldirectory).
+    entitlements: { 'com.apple.security.application-groups': [`group.${bundleId}`] },
     supportsTablet: false,
     associatedDomains: [`applinks:${webHost}`],
     infoPlist: {
@@ -33,8 +36,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
-    // expo-contacts adds WRITE_CONTACTS by default; we only ever read the contacts the user picks.
-    blockedPermissions: ['android.permission.WRITE_CONTACTS'],
+    // Least privilege: drop permissions other plugins add by default. We only read the one contact picked,
+    // never play audio in the background, and the photo picker needs no storage access.
+    blockedPermissions: [
+      'android.permission.WRITE_CONTACTS',
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+    ],
     // Invite links https://<web>/j/<token> open the app directly (Android App Links).
     intentFilters: [
       {
@@ -57,10 +67,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-font',
     'expo-dev-client',
     './modules/call-shield/app.plugin.js',
+    '@bacons/apple-targets',
     ['expo-notifications', { color: '#0E5E5A' }],
-    ['expo-camera', { cameraPermission: 'Η ΑΛΤ! χρειάζεται την κάμερα μόνο για να διαβάσει τον κωδικό σύνδεσης με την οικογένεια.', recordAudioAndroid: false }],
+    ['expo-camera', { cameraPermission: 'Η ΑΛΤ! χρειάζεται την κάμερα μόνο για να διαβάσει τον κωδικό σύνδεσης με την οικογένεια.' }],
     ['expo-contacts', { contactsPermission: 'Η ΑΛΤ! διαβάζει μόνο τις επαφές της οικογένειας που θα διαλέξεις.' }],
-    ['expo-image-picker', { photosPermission: 'Η ΑΛΤ! ανοίγει μόνο τη φωτογραφία που θα διαλέξεις για έλεγχο.', cameraPermission: 'Η ΑΛΤ! χρειάζεται την κάμερα για να φωτογραφίσεις ένα μήνυμα ή γράμμα.', microphonePermission: false }],
+    ['expo-image-picker', { photosPermission: 'Η ΑΛΤ! ανοίγει μόνο τη φωτογραφία που θα διαλέξεις για έλεγχο.', cameraPermission: 'Η ΑΛΤ! χρειάζεται την κάμερα για να φωτογραφίσεις ένα μήνυμα ή γράμμα.' }],
     ['expo-speech-recognition', { microphonePermission: 'Η ΑΛΤ! ακούει μόνο όσο της μιλάς, για να ελέγξει τι σου είπαν.', speechRecognitionPermission: 'Η ΑΛΤ! μετατρέπει τη φωνή σου σε κείμενο για να το ελέγξει.', androidSpeechServicePackages: ['com.google.android.googlequicksearchbox', 'com.google.android.tts'] }],
     ['expo-audio', { microphonePermission: 'Η ΑΛΤ! ακούει μόνο όσο της μιλάς, για να ελέγξει τι σου είπαν.' }],
   ],

@@ -20,7 +20,12 @@ describe('evaluateHealth', () => {
     expect(evaluateHealth('android', all, '2026-10-13T12:00:00Z', now).staleDays).toBeNull();
   });
 
-  it('never invents problems for iOS or unknown fields', () => {
+  it('reports the iOS Call Directory switch', () => {
+    expect(evaluateHealth('ios', { callDirectory: 'enabled' }, null, now)).toEqual({ protecting: true, problems: [], staleDays: null });
+    expect(evaluateHealth('ios', { callDirectory: 'disabled' }, null, now).problems).toEqual(['callDirectory']);
+  });
+
+  it('never invents problems for unknown fields', () => {
     expect(evaluateHealth('ios', {}, null, now)).toEqual({ protecting: false, problems: [], staleDays: null });
     expect(evaluateHealth('android', { supported: true }, null, now).problems).toEqual([]);
   });

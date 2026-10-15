@@ -61,5 +61,19 @@ declare class CallShieldNative extends NativeModule<Events> {
   drainEvents(): string;
 }
 
-/** Android only. On iOS (and in tests) this is null and callers fall back to the manual check-in. */
-export const CallShield: CallShieldNative | null = Platform.OS === 'android' ? requireOptionalNativeModule<CallShieldNative>('CallShield') : null;
+declare class CallDirectoryNative extends NativeModule<Record<string, never>> {
+  isSupported(): boolean;
+  /** Same cache JSON as Android; becomes the Call Directory list (labels + optional blocks). */
+  writeCache(json: string): void;
+  getDirectoryStatus(): Promise<'enabled' | 'disabled' | 'unknown'>;
+  openAppSettings(): void;
+  drainEvents(): string;
+}
+
+const native = requireOptionalNativeModule('CallShield');
+
+/** Android call screening. Null on iOS (and in tests); callers fall back to the manual check-in. */
+export const CallShield = (Platform.OS === 'android' ? native : null) as CallShieldNative | null;
+
+/** iOS Call Directory (labels and blocks reported numbers). Null on Android. */
+export const CallDirectory = (Platform.OS === 'ios' ? native : null) as CallDirectoryNative | null;

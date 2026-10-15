@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Linking, PermissionsAndroid, Platform } from 'react-native';
-import { CallShield, type CallShieldHealth } from '../../../../modules/call-shield';
+import { CallDirectory, CallShield, type CallShieldHealth } from '../../../../modules/call-shield';
 import { AppText } from '@/components/AppText';
 import { BigButton } from '@/components/BigButton';
 import { Card } from '@/components/Card';
@@ -19,7 +19,12 @@ import { useAppStore } from '@/lib/store';
 export default function SetupCalls() {
   const { t } = useTranslation();
   const [health, setHealth] = useState<CallShieldHealth | null>(CallShield?.getHealth() ?? null);
-  const refresh = useCallback(() => setHealth(CallShield?.getHealth() ?? null), []);
+  const [directory, setDirectory] = useState<'enabled' | 'disabled' | 'unknown' | null>(null);
+  const refresh = useCallback(() => {
+    setHealth(CallShield?.getHealth() ?? null);
+    void CallDirectory?.getDirectoryStatus().then(setDirectory);
+  }, []);
+  useEffect(refresh, [refresh]);
 
   useEffect(() => {
     // Settings screens return here; re-read the state each time the app comes back.
@@ -39,8 +44,12 @@ export default function SetupCalls() {
   if (Platform.OS === 'ios') {
     return (
       <SetupFrame step={2} title={t('setup.calls.title')} actions={actions}>
-        <AppText>{t('setup.calls.iosBody')}</AppText>
-        <BigButton variant="outline" label={t('setup.calls.openSettings')} onPress={() => void Linking.openSettings()} />
+        <PermissionRow
+          title={t('setup.calls.role')}
+          why={t('setup.calls.iosBody')}
+          done={directory === 'enabled'}
+          onEnable={() => void Linking.openSettings()}
+        />
         <Card tone="calm">
           <AppText>{t('setup.calls.iosManual')}</AppText>
         </Card>

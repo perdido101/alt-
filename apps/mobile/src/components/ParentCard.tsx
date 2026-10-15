@@ -28,7 +28,7 @@ export function ParentCard({ member, status }: { member: Member; status?: Parent
   const locale = useAppStore((s) => s.locale);
   const joined = !!member.consentedAt;
   const h = status?.health;
-  const callsText = !status?.platform ? null : status.platform === 'ios' ? t('health.callsIos') : h?.protecting ? t('health.callsOn') : t('health.callsOff');
+  const callsText = !status?.platform ? null : status.platform === 'ios' ? (h?.protecting ? t('health.callsIos') : t('health.callsOff')) : h?.protecting ? t('health.callsOn') : t('health.callsOff');
   const when = status?.lastSeenAt ? new Date(status.lastSeenAt).toLocaleString(localeTags[locale], { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : null;
   const quizText = status?.lastQuiz ? t('health.lastQuiz', { result: t(`history.quiz_${status.lastQuiz}`) }) : null;
 
@@ -36,7 +36,7 @@ export function ParentCard({ member, status }: { member: Member; status?: Parent
     <Card>
       <AppText variant="gHeading">{member.displayName}</AppText>
       <Line icon={ShieldCheck} color={joined ? colors.safeText : colors.textSoft} text={joined ? t('guardian.home.protected') : t('guardian.home.notJoined')} />
-      {callsText ? <Line icon={PhoneIncoming} color={h?.protecting || status?.platform === 'ios' ? colors.text : colors.dangerText} text={callsText} /> : null}
+      {callsText ? <Line icon={PhoneIncoming} color={h?.protecting ? colors.text : colors.dangerText} text={callsText} /> : null}
       {quizText ? <Line icon={KeyRound} color={status?.lastQuiz === 'correct' ? colors.text : colors.cautionText} text={quizText} /> : null}
       {when ? <Line icon={Smartphone} color={colors.textSoft} text={t('health.lastActive', { when })} /> : null}
 

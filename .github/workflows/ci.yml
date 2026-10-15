@@ -48,3 +48,13 @@ jobs:
       - run: pnpm --filter @alt/web exec playwright install --with-deps chromium
       # Builds and serves the site without any accounts (bundled content, demo data source).
       - run: pnpm --filter @alt/web test:e2e
+
+  swift:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.0'
+      # iOS Call Directory list builder (pure Foundation, runs on Linux).
+      - run: bash apps/mobile/modules/call-shield/ios-tests/run.sh

@@ -1,4 +1,5 @@
 {
-  "platforms": ["android"],
-  "android": { "modules": ["gr.alt.callshield.CallShieldModule"] }
+  "platforms": ["android", "apple"],
+  "android": { "modules": ["gr.alt.callshield.CallShieldModule"] },
+  "apple": { "modules": ["CallShieldModule"] }
 }

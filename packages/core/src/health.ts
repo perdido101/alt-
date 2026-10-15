@@ -8,9 +8,11 @@ export type DeviceHealth = {
   fullScreenIntent?: boolean;
   phoneState?: boolean;
   platform?: string;
+  /** iOS: Call Directory Extension status. */
+  callDirectory?: 'enabled' | 'disabled' | 'unknown';
 };
 
-export type HealthProblem = 'callScreeningRole' | 'notifications' | 'phoneState' | 'overlay' | 'batteryExempt' | 'fullScreenIntent';
+export type HealthProblem = 'callDirectory' | 'callScreeningRole' | 'notifications' | 'phoneState' | 'overlay' | 'batteryExempt' | 'fullScreenIntent';
 
 export type HealthReport = {
   /** Call protection is actually working (Android with the screening role). */
@@ -28,6 +30,9 @@ export const STALE_AFTER_DAYS = 3;
 export function evaluateHealth(platform: string, health: DeviceHealth, lastSeenAt: string | null, now: Date = new Date()): HealthReport {
   const days = lastSeenAt ? Math.floor((now.getTime() - new Date(lastSeenAt).getTime()) / 86_400_000) : null;
   const staleDays = days !== null && days >= STALE_AFTER_DAYS ? days : null;
+  if (platform === 'ios') {
+    return { protecting: health.callDirectory === 'enabled', problems: health.callDirectory === 'disabled' ? ['callDirectory'] : [], staleDays };
+  }
   if (platform !== 'android' || health.supported === false) return { protecting: false, problems: [], staleDays };
   const problems = ORDER.filter((k) => health[k] === false);
   return { protecting: health.callScreeningRole === true, problems, staleDays };

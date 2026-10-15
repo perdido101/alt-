@@ -21,7 +21,8 @@ export default defineConfig({
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    // The org portal flow is stateful (in-memory demo data), so it runs once, on desktop.
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testIgnore: /org-portal/ },
   ],
   webServer: {
     command: `pnpm build && pnpm start -p ${PORT}`,
