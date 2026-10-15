@@ -28,13 +28,13 @@ export async function myMemberships(): Promise<Membership[]> {
   }));
 }
 
-export type Member = { userId: string; role: MemberRole; displayName: string; consentedAt: string | null; joinedAt: string };
+export type Member = { userId: string; role: MemberRole; displayName: string; consentedAt: string | null; joinedAt: string; phone: string | null };
 
 export async function circleMembers(circleId: string): Promise<Member[]> {
   const rows = unwrap(
-    await supabase.from('circle_members').select('user_id, role, display_name, consented_at, joined_at').eq('circle_id', circleId).order('joined_at'),
-  ) as Array<{ user_id: string; role: MemberRole; display_name: string; consented_at: string | null; joined_at: string }>;
-  return rows.map((r) => ({ userId: r.user_id, role: r.role, displayName: r.display_name, consentedAt: r.consented_at, joinedAt: r.joined_at }));
+    await supabase.from('circle_members').select('user_id, role, display_name, consented_at, joined_at, phone').eq('circle_id', circleId).order('joined_at'),
+  ) as Array<{ user_id: string; role: MemberRole; display_name: string; consented_at: string | null; joined_at: string; phone: string | null }>;
+  return rows.map((r) => ({ userId: r.user_id, role: r.role, displayName: r.display_name, consentedAt: r.consented_at, joinedAt: r.joined_at, phone: r.phone }));
 }
 
 export async function createCircle(name: string, displayName: string): Promise<string> {
@@ -109,4 +109,12 @@ export async function updateProfile(patch: { display_name?: string; locale?: str
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) return;
   unwrap(await supabase.from('profiles').update(patch).eq('id', user.user.id));
+}
+
+/** Saves this member's own phone number (the parent's number, so guardians can call back). */
+export async function setOwnPhone(circleId: string, phone: string): Promise<void> {
+  const e164 = normalisePhone(phone).e164;
+  if (!e164) throw new Error('errors.phoneInvalid');
+  const { data: user } = await supabase.auth.getUser();
+  unwrap(await supabase.from('circle_members').update({ phone: e164 }).eq('circle_id', circleId).eq('user_id', user.user!.id));
 }

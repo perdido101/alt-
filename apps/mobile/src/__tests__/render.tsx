@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react-native';
 import type { Locale } from '@alt/i18n';
 import type { ReactElement } from 'react';
@@ -14,9 +15,11 @@ export async function renderWithProviders(ui: ReactElement, { mode = 'parent', l
   return render(
     <SafeAreaProvider initialMetrics={metrics}>
       <I18nextProvider i18n={i18n}>
-        <ThemeProvider mode={mode} textScale="extraLarge">
-          {ui}
-        </ThemeProvider>
+        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+          <ThemeProvider mode={mode} textScale="extraLarge">
+            {ui}
+          </ThemeProvider>
+        </QueryClientProvider>
       </I18nextProvider>
     </SafeAreaProvider>,
   );

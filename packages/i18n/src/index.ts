@@ -15,3 +15,12 @@ export function isLocale(value: unknown): value is Locale {
 
 /** BCP-47 tag for TTS, Intl formatting and Stripe/Checkout. */
 export const localeTags: Record<Locale, string> = { el: 'el-GR', en: 'en-GB' };
+
+import IntlMessageFormat from 'intl-messageformat';
+
+/** Formats a catalog message outside React (server notifications, SMS, emails). */
+export function translate(locale: Locale, key: string, values?: Record<string, string | number>): string {
+  const msg = key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], messages[locale]);
+  if (typeof msg !== 'string') return key;
+  return String(new IntlMessageFormat(msg, localeTags[locale]).format(values));
+}

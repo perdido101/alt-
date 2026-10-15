@@ -70,7 +70,7 @@ export default function ParentHome() {
         align="left"
         label={tiles.check.label}
         sub={tiles.check.sub}
-        onPress={() => router.push({ pathname: '/parent/coming-soon', params: { feature: 'check' } })}
+        onPress={() => router.push('/parent/check')}
       />
       <BigButton
         testID="home-called"
@@ -90,7 +90,7 @@ export default function ParentHome() {
         variant="ember"
         label={tiles.money.label}
         sub={tiles.money.sub}
-        onPress={() => router.push({ pathname: '/parent/coming-soon', params: { feature: 'alert' } })}
+        onPress={() => router.push({ pathname: '/parent/alert/confirm', params: { source: 'button' } })}
       />
 
       <Card tone="calm">

@@ -13,7 +13,7 @@ import { Card } from '@/components/Card';
 import { Choice } from '@/components/Choice';
 import { SetupFrame } from '@/components/SetupFrame';
 import { TextField } from '@/components/TextField';
-import { addFamilyContact, removeFamilyContact } from '@/lib/api';
+import { addFamilyContact, removeFamilyContact, setOwnPhone } from '@/lib/api';
 import { errorKey } from '@/lib/errors';
 import { useFamilyContacts } from '@/lib/queries';
 import { useAppStore } from '@/lib/store';
@@ -35,6 +35,8 @@ export default function SetupFamily() {
   const [isBackup, setIsBackup] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [ownPhone, setOwnPhoneValue] = useState('');
+  const [ownPhoneError, setOwnPhoneError] = useState<string | null>(null);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['familyContacts', circleId] });
 
@@ -82,12 +84,36 @@ export default function SetupFamily() {
           label={t('common.continue')}
           disabled={list.length === 0}
           onPress={() => {
-            useAppStore.getState().completeSetupStep('family');
-            router.push('/parent/setup/safe-word');
+            void (async () => {
+              if (ownPhone.trim() && circleId) {
+                try {
+                  await setOwnPhone(circleId, ownPhone);
+                } catch {
+                  setOwnPhoneError(t('errors.phoneInvalid'));
+                  return;
+                }
+              }
+              useAppStore.getState().completeSetupStep('family');
+              router.push('/parent/setup/safe-word');
+            })();
           }}
         />
       }
     >
+      <TextField
+        label={t('setup.family.ownPhoneLabel')}
+        value={ownPhone}
+        onChangeText={(v) => {
+          setOwnPhoneValue(v);
+          setOwnPhoneError(null);
+        }}
+        keyboardType="phone-pad"
+        autoComplete="tel"
+        error={ownPhoneError}
+      />
+      <AppText variant="small" color={colors.textSoft}>
+        {t('setup.family.ownPhoneHint')}
+      </AppText>
       <AppText>{t('setup.family.body')}</AppText>
 
       <Card>

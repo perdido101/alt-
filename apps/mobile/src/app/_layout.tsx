@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initI18n } from '@/lib/i18n';
+import { registerForPush, useNotificationRouting } from '@/lib/push';
 import { useSessionSync } from '@/lib/session';
 import { useAppStore } from '@/lib/store';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
@@ -32,6 +33,12 @@ export default function RootLayout() {
   const { hydrated, locale, mode, textScale } = useAppStore();
   const i18n = initI18n(locale);
   useSessionSync();
+  useNotificationRouting(hydrated && !!mode);
+
+  // Register this phone for push once it belongs to a circle (alerts for guardians, quizzes for parents).
+  useEffect(() => {
+    if (hydrated && mode) void registerForPush().catch(() => undefined);
+  }, [hydrated, mode]);
 
   useEffect(() => {
     if (i18n.language !== locale) void i18n.changeLanguage(locale);

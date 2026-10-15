@@ -228,3 +228,51 @@ select tests.eq(public.normalise_safe_word('Ταΐζω'), 'ταιζω', 'norm 2'
 select tests.eq(public.normalise_safe_word('Κόκκινος   Γάιδαρος'), 'κοκκινοσ γαιδαροσ', 'norm 3');
 select tests.eq(public.normalise_safe_word('Crème Brûlée'), 'creme brulee', 'norm 4');
 select tests.eq(public.normalise_safe_word('ΰ'), 'υ', 'norm 5');
+
+-- Channel link codes (milestone 2)
+select tests.login(:'maria', true);
+set role authenticated;
+select public.create_channel_link_code() as link_code \gset
+select tests.eq(:'link_code' ~ '^ALT-[0-9]{6}$', true, 'link code format');
+select tests.expect_error('select * from public.channel_link_codes', 'permission denied');
+reset role;
+select tests.eq((select count(*) from public.channel_link_codes where user_id = :'maria'), 1::bigint, 'one code per user');
+
+-- Alerts (milestone 3)
+insert into public.alerts (id, circle_id, protected_user_id, source)
+values ('00000000-0000-4000-8000-0000000000f2', :'circle', :'maria', 'button');
+insert into public.alert_deliveries (alert_id, recipient_user_id, channel, status)
+values ('00000000-0000-4000-8000-0000000000f2', :'giannis', 'push', 'sent'),
+       ('00000000-0000-4000-8000-0000000000f2', :'eleni', 'push', 'sent');
+-- Unseen alert: escalation is claimed exactly once.
+select tests.eq(public.claim_alert_escalation('00000000-0000-4000-8000-0000000000f2'), true, 'escalation claimed');
+select tests.eq(public.claim_alert_escalation('00000000-0000-4000-8000-0000000000f2'), false, 'escalation idempotent');
+-- Seen alert: no escalation.
+insert into public.alerts (id, circle_id, protected_user_id, source)
+values ('00000000-0000-4000-8000-0000000000f3', :'circle', :'maria', 'button');
+insert into public.alert_deliveries (alert_id, recipient_user_id, channel, status)
+values ('00000000-0000-4000-8000-0000000000f3', :'giannis', 'push', 'sent');
+select tests.login(:'eleni');
+set role authenticated;
+select public.mark_alert_seen('00000000-0000-4000-8000-0000000000f3');
+select tests.eq((select count(*) from public.alert_deliveries where alert_id = '00000000-0000-4000-8000-0000000000f3' and seen_at is not null), 1::bigint, 'seen recorded for guardian without push');
+select tests.expect_error($$select public.claim_alert_escalation('00000000-0000-4000-8000-0000000000f3')$$, 'permission denied');
+reset role;
+select tests.eq(public.claim_alert_escalation('00000000-0000-4000-8000-0000000000f3'), false, 'no escalation once seen');
+-- Parents can't mark seen or resolve; guardians can resolve.
+select tests.login(:'maria', true);
+set role authenticated;
+select tests.expect_error($$select public.resolve_alert('00000000-0000-4000-8000-0000000000f3')$$, 'forbidden');
+select public.register_device('android', 'ExponentPushToken[maria]', '0.2.0', 'Android 15', '{"callScreeningRole":true}');
+select tests.eq((select count(*) from public.devices where user_id = auth.uid()), 1::bigint, 'device upserted, not duplicated');
+update public.circle_members set phone = '+306900000003' where user_id = auth.uid();
+reset role;
+select tests.login(:'giannis');
+set role authenticated;
+select public.resolve_alert('00000000-0000-4000-8000-0000000000f3');
+select tests.eq((select status::text from public.alerts where id = '00000000-0000-4000-8000-0000000000f3'), 'resolved', 'guardian resolved alert');
+select tests.eq((select phone::text from public.circle_members where user_id = :'maria'), '+306900000003', 'guardian sees parent phone');
+-- Moving a push token to another account
+select public.register_device('android', 'ExponentPushToken[maria]');
+reset role;
+select tests.eq((select user_id from public.devices where push_token = 'ExponentPushToken[maria]'), :'giannis'::uuid, 'token moved to new account');
