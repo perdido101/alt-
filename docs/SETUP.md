@@ -20,7 +20,7 @@ rule-based analyser, SMS is printed to the console, and billing/email/analytics 
 
 1. Create a project in **Frankfurt (eu-central-1)**. Pro plan for daily backups + PITR.
 2. `supabase link --project-ref <ref>` then `supabase db push` (applies `supabase/migrations`).
-   Do **not** run `seed.sql` in production (demo family and demo safe word).
+   Do **not** run `seed.sql` in production (demo family and demo safe word); run `production_seed.sql` instead.
 3. Authentication → Providers:
    - **Email** on. Edit the Magic Link template to include `{{ .ConfirmationURL }}` and `{{ .Token }}`, in Greek and English.
    - **Custom SMTP**: use Resend (step 7) so magic links come from your domain.
