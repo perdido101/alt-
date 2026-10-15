@@ -80,7 +80,7 @@ export default function ParentHome() {
         variant="outline"
         label={tiles.called.label}
         sub={tiles.called.sub}
-        onPress={() => router.push({ pathname: '/parent/coming-soon', params: { feature: 'call' } })}
+        onPress={() => router.push('/parent/call/after')}
       />
       <BigButton
         testID="home-money"

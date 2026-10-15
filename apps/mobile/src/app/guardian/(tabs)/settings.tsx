@@ -10,6 +10,7 @@ import { Choice } from '@/components/Choice';
 import { Screen } from '@/components/Screen';
 import { updateProfile } from '@/lib/api';
 import { useSafeWordStatus } from '@/lib/queries';
+import { useProtectionLevel } from '@/lib/settings';
 import { useAppStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -19,6 +20,7 @@ export default function GuardianSettings() {
   const { colors } = useTheme();
   const { locale, setLocale, reset } = useAppStore();
   const safeWord = useSafeWordStatus();
+  const protection = useProtectionLevel();
 
   return (
     <Screen>
@@ -36,6 +38,18 @@ export default function GuardianSettings() {
               setLocale(l);
               void updateProfile({ locale: l });
             }}
+          />
+        ))}
+      </View>
+      <AppText variant="gTitle">{t('protection.title')}</AppText>
+      <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+        {(['warn', 'silence', 'block'] as const).map((level) => (
+          <Choice
+            key={level}
+            label={t(`protection.${level}`)}
+            sub={t(`protection.${level}Sub`)}
+            selected={protection.level === level}
+            onPress={() => protection.set(level)}
           />
         ))}
       </View>

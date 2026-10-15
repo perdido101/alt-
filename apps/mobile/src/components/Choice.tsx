@@ -4,10 +4,10 @@ import { radii, spacing, tapTarget } from '@alt/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { AppText } from './AppText';
 
-type Props = { label: string; selected: boolean; onPress: () => void; previewScale?: number; kind?: 'radio' | 'checkbox' };
+type Props = { label: string; sub?: string; selected: boolean; onPress: () => void; previewScale?: number; kind?: 'radio' | 'checkbox' };
 
 /** A large radio or checkbox option (language, text size, relation, guardian/backup flags). */
-export function Choice({ label, selected, onPress, previewScale, kind = 'radio' }: Props) {
+export function Choice({ label, sub, selected, onPress, previewScale, kind = 'radio' }: Props) {
   const theme = useTheme();
   const { colors } = theme;
   const style = theme.text('bodyStrong');
@@ -15,7 +15,7 @@ export function Choice({ label, selected, onPress, previewScale, kind = 'radio' 
     <Pressable
       accessibilityRole={kind}
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={label}
+      accessibilityLabel={sub ? `${label}. ${sub}` : label}
       onPress={onPress}
       style={{
         minHeight: tapTarget.primaryMin,
@@ -29,9 +29,16 @@ export function Choice({ label, selected, onPress, previewScale, kind = 'radio' 
         justifyContent: 'space-between',
       }}
     >
-      <AppText variant="bodyStrong" style={previewScale ? { fontSize: style.fontSize * previewScale, lineHeight: style.lineHeight * previewScale } : undefined}>
-        {label}
-      </AppText>
+      <View style={{ flexShrink: 1, paddingVertical: sub ? spacing.sm : 0 }}>
+        <AppText variant={theme.mode === 'parent' ? 'bodyStrong' : 'gTitle'} style={previewScale ? { fontSize: style.fontSize * previewScale, lineHeight: style.lineHeight * previewScale } : undefined}>
+          {label}
+        </AppText>
+        {sub ? (
+          <AppText variant={theme.mode === 'parent' ? 'small' : 'gBody'} color={colors.textSoft}>
+            {sub}
+          </AppText>
+        ) : null}
+      </View>
       <View style={{ width: 32, alignItems: 'center' }}>
         {selected && <Check color={colors.primary} size={28} strokeWidth={3} />}
       </View>

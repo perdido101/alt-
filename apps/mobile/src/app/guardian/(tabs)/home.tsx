@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { BellRing, Phone, ShieldCheck, UserPlus } from 'lucide-react-native';
+import { BellRing, Phone, UserPlus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,9 +8,11 @@ import { radii, spacing } from '@alt/tokens';
 import { AppText } from '@/components/AppText';
 import { BigButton } from '@/components/BigButton';
 import { Card } from '@/components/Card';
+import { ParentCard } from '@/components/ParentCard';
 import { Wordmark } from '@/components/Wordmark';
 import { openAlerts } from '@/lib/alerts';
 import { callNumber } from '@/lib/family';
+import { useParentStatuses } from '@/lib/parentStatus';
 import { useCircleMembers } from '@/lib/queries';
 import { useAppStore } from '@/lib/store';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -23,6 +25,7 @@ export default function GuardianHome() {
   const circleId = useAppStore((s) => s.circleId);
   const alerts = useQuery({ queryKey: ['openAlerts', circleId], queryFn: () => openAlerts(circleId!), enabled: !!circleId, refetchInterval: 15_000 });
   const parents = (members.data ?? []).filter((m) => m.role === 'protected');
+  const statuses = useParentStatuses(parents.map((p) => p.userId));
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
@@ -49,15 +52,7 @@ export default function GuardianHome() {
           );
         })}
         {parents.map((p) => (
-          <Card key={p.userId}>
-            <AppText variant="gHeading">{p.displayName}</AppText>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-              <ShieldCheck color={colors.safe} size={20} />
-              <AppText variant="gTitle" color={colors.safeText}>
-                {p.consentedAt ? t('guardian.home.protected') : t('guardian.home.notJoined')}
-              </AppText>
-            </View>
-          </Card>
+          <ParentCard key={p.userId} member={p} status={statuses.data?.find((x) => x.userId === p.userId)} />
         ))}
         {members.isSuccess && parents.length === 0 && (
           <Card tone="calm">

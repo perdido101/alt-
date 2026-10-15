@@ -1,0 +1,24 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'gr.alt'
+version = '0.1.0'
+
+android {
+  namespace "gr.alt.callshield"
+  defaultConfig {
+    versionCode 1
+    versionName '0.1.0'
+  }
+  sourceSets {
+    // The pure decision logic lives in ../logic so it can be unit-tested on the JVM.
+    main.java.srcDirs += ['../logic/src/main/kotlin']
+  }
+}
+
+dependencies {
+  implementation 'com.googlecode.libphonenumber:libphonenumber:9.0.16'
+  implementation 'androidx.core:core-ktx:1.13.1'
+}

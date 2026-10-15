@@ -1,0 +1,31 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!--
+    Every permission is explained in docs/PERMISSIONS.md.
+    No call log, no microphone, no contacts writing, no default-dialer role.
+  -->
+  <!-- Detect when an answered call ends, to offer the after-call check-in. -->
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+  <!-- Warnings and check-ins are notifications (Android 13+ asks the user). -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- After-call check-in can open over the lock screen. Play Console declaration required. -->
+  <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+  <!-- Optional: the ringing banner over the incoming-call screen. The user grants it in system settings. -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+  <application>
+    <service
+      android:name="gr.alt.callshield.AltCallScreeningService"
+      android:exported="true"
+      android:permission="android.permission.BIND_SCREENING_SERVICE">
+      <intent-filter>
+        <action android:name="android.telecom.CallScreeningService" />
+      </intent-filter>
+    </service>
+
+    <receiver android:name="gr.alt.callshield.PhoneStateReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.PHONE_STATE" />
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>

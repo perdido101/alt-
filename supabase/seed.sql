@@ -88,14 +88,23 @@ from (values
   ('Ελληνική Αστυνομία (Διεύθυνση Δίωξης Ηλεκτρονικού Εγκλήματος)', 'Hellenic Police Cyber Crime Division', 'police')
 ) as o (el, en, cat);
 
--- Reputation (fictional numbers) ----------------------------------------------------------------
-insert into public.number_reputation (number_key, approved_reports, flagged) values
-  ('+306980000001', 5, false),
-  ('+306980000003', 0, true);
+-- Greek article per organisation, for "ΔΕΝ ανήκει στην/στον/στα <Organisation>".
+update public.official_numbers set article_el = case
+  when organisation_el in ('ΕΛΤΑ', 'ΕΛΤΑ Courier') then 'ta'
+  when organisation_el in ('e-ΕΦΚΑ') or organisation_el like 'Ευαγγελισμός%' then 'o'
+  when organisation_el = 'ΕΚΑΒ' then 'to'
+  else 'i' end;
 
+-- Reputation (fictional numbers) ----------------------------------------------------------------
 insert into public.number_reports (number_key, reporter_id, circle_id, claimed_category, status) values
   ('+306980000001', '00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-0000000000c1', 'police', 'approved'),
   ('+306980000004', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-0000000000c1', 'bank', 'pending');
+
+-- Demo reputation as if many families had reported (reports above recompute it, so this comes after).
+insert into public.number_reputation (number_key, approved_reports, flagged) values
+  ('+306980000001', 5, false),
+  ('+306980000003', 0, true)
+on conflict (number_key) do update set approved_reports = excluded.approved_reports, flagged = excluded.flagged;
 
 -- Activity --------------------------------------------------------------------------------------
 insert into public.checks (circle_id, user_id, channel, input_kind, verdict, category, reason, action, suggest_alert, created_at) values

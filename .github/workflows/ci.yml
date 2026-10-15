@@ -20,3 +20,17 @@ jobs:
       - run: pnpm test
       # Applies all migrations + seed to a throwaway Postgres and runs the RLS/RPC tests.
       - run: pnpm db:test
+
+  kotlin:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.14.3
+      # Call-screening decision logic, checked against the same fixtures as packages/core.
+      - run: gradle -p apps/mobile/modules/call-shield/logic test

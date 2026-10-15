@@ -56,6 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-localization',
     'expo-font',
     'expo-dev-client',
+    './modules/call-shield/app.plugin.js',
     ['expo-notifications', { color: '#0E5E5A' }],
     ['expo-camera', { cameraPermission: 'Η ΑΛΤ! χρειάζεται την κάμερα μόνο για να διαβάσει τον κωδικό σύνδεσης με την οικογένεια.', recordAudioAndroid: false }],
     ['expo-contacts', { contactsPermission: 'Η ΑΛΤ! διαβάζει μόνο τις επαφές της οικογένειας που θα διαλέξεις.' }],

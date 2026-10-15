@@ -38,9 +38,14 @@ describe('message catalogs', () => {
     });
   }
 
+  // Greek-only grammar arguments (e.g. the article that picks στον/στην/στα) may be absent in English.
+  const GRAMMAR_ONLY = new Set(['article']);
+
   it('use the same placeholders in el and en', () => {
     for (const [key, msg] of Object.entries(flat.el)) {
-      expect(placeholders(flat.en[key]!), key).toEqual(placeholders(msg));
+      const el = placeholders(msg).filter((p) => !GRAMMAR_ONLY.has(p));
+      const en = placeholders(flat.en[key]!).filter((p) => !GRAMMAR_ONLY.has(p));
+      expect([...new Set(en)].sort(), key).toEqual([...new Set(el)].sort());
     }
   });
 
@@ -63,5 +68,19 @@ describe('message catalogs', () => {
         expect(msg).not.toMatch(/100%|απόλυτα ασφαλ|completely safe|ΚΙΝΔΥΝΟΣ/i);
       }
     }
+  });
+});
+
+describe('Greek grammar for organisations', () => {
+  const t = (key: string, v: Record<string, string>) => new IntlMessageFormat(flat.el[key]!, 'el').format(v);
+  it('picks στην/στον/στα', () => {
+    expect(t('call.mismatchTitle', { org: 'Ελληνική Αστυνομία', article: 'i' })).toBe('Αυτός ο αριθμός ΔΕΝ ανήκει στην Ελληνική Αστυνομία');
+    expect(t('call.mismatchTitle', { org: 'ΕΛΤΑ', article: 'ta' })).toBe('Αυτός ο αριθμός ΔΕΝ ανήκει στα ΕΛΤΑ');
+    expect(t('call.mismatchTitle', { org: 'e-ΕΦΚΑ', article: 'o' })).toBe('Αυτός ο αριθμός ΔΕΝ ανήκει στον e-ΕΦΚΑ');
+  });
+  it('agrees the verb and article', () => {
+    expect(t('call.neverAsks', { org: 'ΕΛΤΑ', article: 'ta' })).toBe('Τα ΕΛΤΑ δεν ζητούν ποτέ χρήματα ή κωδικούς στο τηλέφωνο.');
+    expect(t('call.neverAsks', { org: 'Ελληνική Αστυνομία', article: 'i' })).toBe('Η Ελληνική Αστυνομία δεν ζητά ποτέ χρήματα ή κωδικούς στο τηλέφωνο.');
+    expect(t('call.callReal', { org: 'Ελληνική Αστυνομία', article: 'i', number: '100' })).toBe('Πάρε την πραγματική Ελληνική Αστυνομία (100)');
   });
 });

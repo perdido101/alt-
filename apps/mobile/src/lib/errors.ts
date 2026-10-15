@@ -7,6 +7,7 @@ const KNOWN: Record<string, string> = {
   invite_expired: 'errors.inviteExpired',
   circle_full: 'errors.circleFull',
   safe_word_too_short: 'errors.safeWordTooShort',
+  rate_limited: 'check.tooMany',
 };
 
 export function errorKey(error: unknown): string {

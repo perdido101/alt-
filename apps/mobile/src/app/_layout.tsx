@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useCallShieldSync } from '@/lib/callShield';
 import { initI18n } from '@/lib/i18n';
 import { registerForPush, useNotificationRouting } from '@/lib/push';
 import { useSessionSync } from '@/lib/session';
@@ -34,6 +35,7 @@ export default function RootLayout() {
   const i18n = initI18n(locale);
   useSessionSync();
   useNotificationRouting(hydrated && !!mode);
+  useCallShieldSync(hydrated && mode === 'parent');
 
   // Register this phone for push once it belongs to a circle (alerts for guardians, quizzes for parents).
   useEffect(() => {

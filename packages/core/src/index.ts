@@ -6,3 +6,4 @@ export * from './safeWord';
 export * from './invite';
 export * from './schemas';
 export * from './analysis';
+export * from './health';

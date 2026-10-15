@@ -85,7 +85,7 @@ select tests.eq((select count(*) from public.subscriptions), 0::bigint, 'parent 
 select tests.eq((select count(*) from public.invites), 0::bigint, 'parent sees no invites');
 select tests.eq((select count(*) from public.family_contacts), 3::bigint, 'parent sees family contacts (call screening cache)');
 select tests.eq((select count(*) from public.official_numbers), 4::bigint, 'parent sees active official numbers only');
-select tests.eq((select count(*) from public.number_reputation), 2::bigint, 'parent reads reputation');
+select tests.eq((select count(*) from public.number_reputation), 3::bigint, 'parent reads reputation');
 select tests.eq(public.check_safe_word(:'circle', 'ΛΕΜΟΝΟΠΙΤΑ '), true, 'safe word matches ignoring case/accents');
 select tests.eq(public.check_safe_word(:'circle', 'πορτοκαλόπιτα'), false, 'wrong safe word');
 select tests.expect_error($$select public.set_safe_word('00000000-0000-4000-8000-0000000000c1', 'καινούργια')$$, 'forbidden');
@@ -276,3 +276,32 @@ select tests.eq((select phone::text from public.circle_members where user_id = :
 select public.register_device('android', 'ExponentPushToken[maria]');
 reset role;
 select tests.eq((select user_id from public.devices where push_token = 'ExponentPushToken[maria]'), :'giannis'::uuid, 'token moved to new account');
+
+-- Call Shield (milestone 4)
+select tests.eq((select article_el from public.official_numbers where organisation_el = 'ΕΛΤΑ'), 'ta', 'article for ΕΛΤΑ');
+select tests.login(:'maria', true);
+set role authenticated;
+insert into public.number_reports (number_key, reporter_id, circle_id, claimed_category) values ('+306980000077', auth.uid(), :'circle', 'bank');
+insert into public.call_events (circle_id, user_id, number_key, number_kind, classification, client_ref)
+values (:'circle', auth.uid(), '+306980000077', 'domestic', 'unknown', 'local-1');
+select tests.expect_error(format($$insert into public.call_events (circle_id, user_id, number_kind, classification, client_ref) values (%L, auth.uid(), 'hidden', 'risky', 'local-1')$$, :'circle'), 'duplicate key');
+reset role;
+select tests.eq((select flagged from public.number_reputation where number_key = '+306980000077'), false, 'one family is not enough to flag');
+select tests.login('00000000-0000-4000-8000-000000000103', true);
+set role authenticated;
+insert into public.number_reports (number_key, reporter_id, circle_id) values ('+306980000077', auth.uid(), (select circle_id from public.circle_members where user_id = auth.uid()));
+reset role;
+select tests.eq((select flagged from public.number_reputation where number_key = '+306980000077'), true, 'two families flag a new number');
+select tests.login(:'admin');
+set role authenticated;
+update public.number_reports set status = 'approved' where number_key = '+306980000077';
+reset role;
+select tests.eq((select approved_reports from public.number_reputation where number_key = '+306980000077'), 2, 'approved reports counted');
+select tests.eq((select flagged from public.number_reputation where number_key = '+306980000077'), false, 'no longer pending');
+-- Re-uploading the same screened call is a no-op (what the app's upsert does).
+select tests.login(:'maria', true);
+set role authenticated;
+insert into public.call_events (circle_id, user_id, number_kind, classification, client_ref)
+values (:'circle', auth.uid(), 'hidden', 'risky', 'local-1') on conflict (user_id, client_ref) do nothing;
+select tests.eq((select count(*) from public.call_events where client_ref = 'local-1'), 1::bigint, 'idempotent upload');
+reset role;
