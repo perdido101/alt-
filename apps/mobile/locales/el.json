@@ -1,5 +1,10 @@
 {
-  "CFBundleDisplayName": "ΑΛΤ!",
-  "NSCameraUsageDescription": "Η ΑΛΤ! χρειάζεται την κάμερα μόνο για να διαβάσει τον κωδικό σύνδεσης με την οικογένεια.",
-  "NSContactsUsageDescription": "Η ΑΛΤ! διαβάζει μόνο τις επαφές της οικογένειας που θα διαλέξεις."
+  "ios": {
+    "CFBundleDisplayName": "ΑΛΤ!",
+    "NSCameraUsageDescription": "Η ΑΛΤ! χρειάζεται την κάμερα μόνο για να διαβάσει τον κωδικό σύνδεσης με την οικογένεια.",
+    "NSContactsUsageDescription": "Η ΑΛΤ! διαβάζει μόνο τις επαφές της οικογένειας που θα διαλέξεις."
+  },
+  "android": {
+    "app_name": "ΑΛΤ!"
+  }
 }
