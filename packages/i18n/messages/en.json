@@ -755,7 +755,13 @@
     "cobranding": "Co-branding",
     "createOrg": "New organisation",
     "addAdmin": "Organisation admin email",
-    "verifyNeedsSource": "Verifying needs a number, display and source."
+    "verifyNeedsSource": "Verifying needs a number, display and source.",
+    "smsTest": "SMS test",
+    "smsTestIntro": "Sends one test SMS with the configured sender (SMS_SENDER_ID), so you can see what appears on the phone.",
+    "smsTo": "Mobile number",
+    "smsSend": "Send test SMS",
+    "smsSent": "Sent from \"{from}\". Check your phone.",
+    "smsFailed": "Not sent:"
   },
   "org": {
     "title": "Organisation portal",

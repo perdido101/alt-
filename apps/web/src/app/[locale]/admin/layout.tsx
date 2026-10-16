@@ -25,6 +25,7 @@ export default async function AdminLayout({ children, params }: { children: Reac
           { href: '/radar', label: t('admin.radar') },
           { href: '/orgs', label: t('admin.orgs') },
           { href: '/requests', label: t('admin.requests') },
+          { href: '/sms', label: t('admin.smsTest') },
         ]}
       />
       <div className="stack">{children}</div>

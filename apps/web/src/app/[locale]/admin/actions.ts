@@ -128,3 +128,18 @@ export async function updateSeats(f: FormData) {
     .eq('id', z.string().uuid().parse(s(f, 'id')));
   revalidatePath('/[locale]/admin/orgs', 'page');
 }
+
+/** Sends one test SMS through the configured provider, so the sender ("ALT" or a number) can be checked. */
+export async function sendTestSms(f: FormData) {
+  await requireAdmin();
+  const locale = s(f, 'locale') === 'en' ? 'en' : 'el';
+  const to = normalisePhone(s(f, 'to')).e164;
+  const { smsProvider } = await import('@/server/notify/sms');
+  const { env } = await import('@/server/env');
+  const result = to
+    ? await smsProvider().send(to, 'ΑΛΤ!: Δοκιμαστικό μήνυμα. Αν το βλέπεις, τα SMS ειδοποίησης λειτουργούν. / Test message.')
+    : { ok: false, error: 'invalid_number' };
+  const q = new URLSearchParams({ ok: result.ok ? '1' : '0', from: env().SMS_SENDER_ID, provider: env().SMS_PROVIDER, ...(result.error ? { error: result.error } : {}) });
+  const { redirect } = await import('next/navigation');
+  redirect(`/${locale}/admin/sms?${q}`);
+}
