@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { AppNav } from '@/components/AppNav';
 import { SignInForm } from '@/components/SignInForm';
-import { currentUser } from '@/server/auth';
+import { currentUser, supabaseServer } from '@/server/auth';
 import { asLocale } from '@/i18n/locale';
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -33,10 +33,22 @@ export default async function AppLayout({ children, params }: { children: ReactN
       </section>
     );
   }
+  // Admins and organisation staff get a shortcut to their areas (RLS decides what each can read).
+  const db = await supabaseServer();
+  const [{ data: profile }, { data: orgs }] = await Promise.all([
+    db.from('profiles').select('is_admin').eq('id', user.id).maybeSingle(),
+    db.from('org_members').select('org_id').eq('user_id', user.id).limit(1),
+  ]);
+  const ta = await getTranslations();
+  const extra = [
+    ...((profile as { is_admin?: boolean } | null)?.is_admin ? [{ href: '/admin', label: ta('admin.title') }] : []),
+    ...((orgs ?? []).length ? [{ href: '/org', label: ta('org.title') }] : []),
+  ];
   return (
     <div className="container app-shell">
       <AppNav
         base="/app"
+        extra={extra}
         items={[
           { href: '', label: t('overview') },
           { href: '/history', label: t('history') },
